@@ -3,6 +3,7 @@ package translators
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/chromedp/chromedp"
 )
@@ -33,6 +34,8 @@ func (dt *DeeplTranslator) GetTranslation(translationOptions TranslationOptions)
 		chromedp.TextContent("#target-dummydiv", &translationResult.Translation),
 	}
 	err := chromedp.Run(taskCtx, actions...)
+
+	translationResult.Translation = strings.TrimSpace(translationResult.Translation)
 
 	return translationResult, err
 }

@@ -6,9 +6,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
+	"vnr/src/server"
 	"vnr/src/translators"
 )
 
@@ -35,38 +35,43 @@ func main() {
 		Headless: *headlessFlag,
 	})
 
-	words := []string{
-		"こんいちは",
-		"hello",
-		"schwartz",
-	}
-	wg := sync.WaitGroup{}
-	wg.Add(len(words))
+	server.StartServer(server.ServerOptions{
+		Port:       3000,
+		Translator: translator,
+	})
 
-	log.Printf("fetching translations...")
-	for i, word := range words {
-		word := word
-		i := i
-		go func() {
-			defer wg.Done()
+	// words := []string{
+	// 	"こんいちは",
+	// 	"hello",
+	// 	"schwartz",
+	// }
+	// wg := sync.WaitGroup{}
+	// wg.Add(len(words))
 
-			translationOptions := translators.NewTranslationOptions(word)
-			translationOptions.To = "ru"
-			if i == 1 {
-				translationOptions.Timeont = time.Millisecond * 1000
-			}
+	// log.Printf("fetching translations...")
+	// for i, word := range words {
+	// 	word := word
+	// 	i := i
+	// 	go func() {
+	// 		defer wg.Done()
 
-			translation, err := translator.GetTranslation(translationOptions)
-			if err != nil {
-				log.Printf("wrror while fetching translation, %s", err)
-			} else {
-				log.Printf("got translation: %s => %s", translation.TranslationOptions, translation.Translation)
-			}
-		}()
-	}
+	// 		translationOptions := translators.NewTranslationOptions(word)
+	// 		translationOptions.To = "ru"
+	// 		if i == 1 {
+	// 			translationOptions.Timeont = time.Millisecond * 1000
+	// 		}
 
-	wg.Wait()
-	log.Printf("translations fetched")
+	// 		translation, err := translator.GetTranslation(translationOptions)
+	// 		if err != nil {
+	// 			log.Printf("wrror while fetching translation, %s", err)
+	// 		} else {
+	// 			log.Printf("got translation: %s => %s", translation.TranslationOptions, translation.Translation)
+	// 		}
+	// 	}()
+	// }
+
+	// wg.Wait()
+	// log.Printf("translations fetched")
 }
 
 func handleOsInterrupt(fns ...func()) {

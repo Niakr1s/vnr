@@ -15,11 +15,11 @@ type TranslatorInitOptions struct {
 }
 
 type TranslationOptions struct {
-	From     string
-	To       string
-	Sentence string
+	From     string `json:"from"`
+	To       string `json:"to"`
+	Sentence string `json:"sentence"`
 
-	Timeont time.Duration
+	Timeont time.Duration `json:"-"`
 }
 
 func NewTranslationOptions(sentence string) TranslationOptions {
@@ -34,7 +34,7 @@ func NewTranslationOptions(sentence string) TranslationOptions {
 
 type TranslationResult struct {
 	TranslationOptions
-	Translation string
+	Translation string `json:"translation"`
 }
 
 type Translator interface {
