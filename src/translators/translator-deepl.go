@@ -25,7 +25,7 @@ func (dt *DeeplTranslator) GetTranslation(translationOptions TranslationOptions)
 
 	translationResult := TranslationResult{TranslationOptions: translationOptions}
 
-	url := fmt.Sprintf("https://www.deepl.com/translator#%s/%s/%s", translationOptions.From, translationOptions.To, translationOptions.Sentence)
+	url := dt.translationOptionsToUrl(translationOptions)
 
 	actions := []chromedp.Action{
 		chromedp.Navigate(url),
@@ -35,4 +35,8 @@ func (dt *DeeplTranslator) GetTranslation(translationOptions TranslationOptions)
 	err := chromedp.Run(taskCtx, actions...)
 
 	return translationResult, err
+}
+
+func (dt *DeeplTranslator) translationOptionsToUrl(translationOptions TranslationOptions) string {
+	return fmt.Sprintf("https://www.deepl.com/translator#%s/%s/%s", translationOptions.From, translationOptions.To, translationOptions.Sentence)
 }
