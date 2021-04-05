@@ -1,0 +1,12 @@
+<div class="langs">
+  <span>langs:</span>
+  <ng-container class="langs" *ngFor="let item of languages | keyvalue">
+    <input
+      [name]="item.key"
+      type="checkbox"
+      [checked]="item.value"
+      [title]="item.key"
+      (click)="onToggle(item.key)"
+    />
+  </ng-container>
+</div>

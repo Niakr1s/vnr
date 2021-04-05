@@ -1,0 +1,8 @@
+.langs {
+  margin-right: 10px;
+}
+
+.langs > input {
+  border: 0;
+  margin: 0;
+}

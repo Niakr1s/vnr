@@ -7,6 +7,7 @@ import { ControlComponent } from './control/control.component';
 import { SentenceComponent } from './sentence/sentence.component';
 import { TranslationComponent } from './translation/translation.component';
 import { ProgressComponent } from './progress/progress.component';
+import { LanguageComponent } from './language/language.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { ProgressComponent } from './progress/progress.component';
     SentenceComponent,
     TranslationComponent,
     ProgressComponent,
+    LanguageComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule],
   providers: [],
