@@ -10,6 +10,7 @@ import { TranslationService } from './translation.service';
 })
 export class SentenceService {
   private sentences: Sentence[] = [];
+  private maxSentences = 3;
 
   private _currentIndex = -1;
   private get currentIndex(): number {
@@ -63,6 +64,11 @@ export class SentenceService {
   private pushSentence(sentence: Sentence): void {
     this.sentences.push(sentence);
     this.currentIndex = this.sentences.length - 1;
+
+    if (this.sentences.length > this.maxSentences) {
+      this.deleteSentenceAt(0);
+    }
+
     this.currentSencenceSubject.next(sentence);
     this.totalSentencesSubject.next(this.sentences.length);
   }
