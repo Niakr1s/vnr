@@ -10,7 +10,7 @@ import { TranslationService } from './translation.service';
 })
 export class SentenceService {
   private sentences: Sentence[] = [];
-  private maxSentences = 3;
+  private maxSentences = 99;
 
   private _currentIndex = -1;
   private get currentIndex(): number {
