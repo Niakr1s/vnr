@@ -59,7 +59,7 @@
           try {
             console.log(`fetching translation for ${options.sentence}`);
             const res = await fetch(
-              `translate?sentence=${options.sentence}&to=${options.targetLanguage}&from=${options.sourceLangauge}`
+              `api/translate?sentence=${options.sentence}&to=${options.targetLanguage}&from=${options.sourceLangauge}`
             );
             const resJSON = await res.json();
             this._cb(resJSON);
