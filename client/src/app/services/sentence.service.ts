@@ -97,10 +97,6 @@ export class SentenceService {
     this.totalSentencesSubject.next(this.sentences.length);
   }
 
-  deleteCurrentSentence(): void {
-    this.deleteSentenceAt(this.currentIndex);
-  }
-
   private async translate(sentence: Sentence, tos: string[]): Promise<void> {
     const translations = await Promise.all(
       tos.map((to) => this.translationService.translate(sentence, to))
@@ -108,7 +104,7 @@ export class SentenceService {
     this.setTranslation(sentence.id, translations);
   }
 
-  setTranslation(id: number, translations: Translation[]): void {
+  private setTranslation(id: number, translations: Translation[]): void {
     const sentence = this.sentences.find((s) => s.id === id);
     if (!sentence) {
       return;
@@ -123,9 +119,13 @@ export class SentenceService {
     }
   }
 
-  isCurrent(sentence: Sentence): boolean {
+  private isCurrent(sentence: Sentence): boolean {
     const currentSentence = this.currentSentence;
     return currentSentence != null && currentSentence === sentence;
+  }
+
+  deleteCurrentSentence(): void {
+    this.deleteSentenceAt(this.currentIndex);
   }
 
   hasPrev(): boolean {
