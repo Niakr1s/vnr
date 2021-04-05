@@ -25,14 +25,20 @@ func StartServer(options ServerOptions) {
 	var staticFS = http.FS(staticFiles)
 	fs := http.FileServer(staticFS)
 
-	http.Handle("/static/", fs)
-	http.Handle("/", indexHandler(options))
+	if !isDevMode {
+		http.Handle("/static/", fs)
+		http.Handle("/", indexHandler(options))
+	}
 
-	http.HandleFunc("/api/translate", translationHandler(options))
+	translationHandler := translationHandler(options)
+	if isDevMode {
+		translationHandler = corsMiddleware(translationHandler)
+	}
+	http.HandleFunc("/api/translate", translationHandler)
 
-	log.Println("Listening on :3000...")
+	log.Println("Listening on :5322...")
 	// start the server
-	err := http.ListenAndServe(":3000", nil)
+	err := http.ListenAndServe(":5322", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
