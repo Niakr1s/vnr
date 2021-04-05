@@ -30,9 +30,9 @@ func StartServer(options ServerOptions) {
 
 	http.HandleFunc("/api/translate", translationHandler(options))
 
-	log.Println("Listening on :3000...")
+	log.Println("Listening on :5322...")
 	// start the server
-	err := http.ListenAndServe(":3000", nil)
+	err := http.ListenAndServe(":5322", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
