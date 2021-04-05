@@ -67,20 +67,32 @@ export class SentenceService {
     this.totalSentencesSubject.next(this.sentences.length);
   }
 
-  deleteCurrentSentence(): void {
-    if (this.currentIndex < 0 || this.sentences.length === 0) {
+  private deleteSentenceAt(index: number): void {
+    if (
+      index < 0 ||
+      index >= this.sentences.length ||
+      this.sentences.length === 0
+    ) {
       return;
     }
 
-    this.sentences.splice(this.currentIndex, 1);
+    this.sentences.splice(index, 1);
 
     // if we deleted last sentence - adjusting currentIndex
-    if (this.currentIndex >= this.sentences.length) {
-      this.currentIndex = this.sentences.length - 1;
+    if (
+      index < this.currentIndex ||
+      this.sentences.length === 0 ||
+      this.currentIndex === this.sentences.length
+    ) {
+      this.currentIndex--;
     }
 
     this.currentSencenceSubject.next(this.currentSentence);
     this.totalSentencesSubject.next(this.sentences.length);
+  }
+
+  deleteCurrentSentence(): void {
+    this.deleteSentenceAt(this.currentIndex);
   }
 
   private async translate(sentence: Sentence, tos: string[]): Promise<void> {
