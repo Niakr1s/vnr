@@ -6,6 +6,10 @@
   color: green;
 }
 
+.white {
+  color: #bcbcbc;
+}
+
 button {
   border: none;
   outline: none;
