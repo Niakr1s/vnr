@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { Languages, LanguageService } from '../services/language.service';
 import { Sentence } from '../services/models/sentence';
 import { SentenceService } from '../services/sentence.service';
 
@@ -8,20 +9,35 @@ import { SentenceService } from '../services/sentence.service';
   templateUrl: './translation.component.html',
   styleUrls: ['./translation.component.css'],
 })
-export class TranslationComponent implements OnInit {
+export class TranslationComponent implements OnInit, OnDestroy {
   sentence!: Sentence | null;
-  private sentenceSub!: Subscription;
+  languages!: Languages;
 
-  constructor(private sentenceService: SentenceService) {}
+  private subs: Subscription[] = [];
+
+  constructor(
+    private sentenceService: SentenceService,
+    private languageService: LanguageService
+  ) {}
+
   ngOnInit(): void {
-    this.sentenceSub = this.sentenceService.currentSentence$.subscribe({
-      next: (sentence) => {
-        this.sentence = sentence;
-      },
-    });
+    this.subs.push(
+      this.sentenceService.currentSentence$.subscribe({
+        next: (sentence) => {
+          this.sentence = sentence;
+        },
+      })
+    );
+    this.subs.push(
+      this.languageService.languages$.subscribe({
+        next: (l) => {
+          this.languages = l;
+        },
+      })
+    );
   }
 
   ngOnDestroy(): void {
-    this.sentenceSub.unsubscribe();
+    this.subs.forEach((s) => s.unsubscribe());
   }
 }
