@@ -1,0 +1,36 @@
+<button
+  id="delete_button"
+  class="red"
+  (click)="onDelete()"
+  [ngClass]="{ white: total === 0 }"
+  [disabled]="total === 0"
+>
+  <
+</button>
+<button
+  id="prev_button"
+  class="green"
+  (click)="onPrev()"
+  [ngClass]="{ white: !hasPrev() }"
+  [disabled]="!hasPrev()"
+>
+  <
+</button>
+<button
+  id="next_button"
+  class="green"
+  (click)="onNext()"
+  [ngClass]="{ white: !hasNext() }"
+  [disabled]="!hasNext()"
+>
+  >
+</button>
+<button
+  id="last_button"
+  class="green"
+  (click)="onLast()"
+  [ngClass]="{ white: !hasNext() }"
+  [disabled]="!hasNext()"
+>
+  >>
+</button>

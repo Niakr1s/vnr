@@ -1,0 +1,17 @@
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
+}
+
+.white {
+  color: #bcbcbc;
+}
+
+button {
+  border: none;
+  outline: none;
+  background-color: transparent;
+}

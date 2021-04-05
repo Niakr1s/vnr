@@ -1,0 +1,10 @@
+.bottom {
+  position: absolute;
+  bottom: 0px;
+  left: 10px;
+  right: 10px;
+}
+
+.translation {
+  font-size: 20px;
+}
