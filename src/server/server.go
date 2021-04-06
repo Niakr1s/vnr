@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	"encoding/json"
+	"io/fs"
 	"log"
 	"net/http"
 	"net/url"
@@ -12,9 +13,6 @@ import (
 //go:embed static
 var staticFiles embed.FS
 
-//go:embed index.html
-var indexHTML []byte
-
 type ServerOptions struct {
 	Port int
 
@@ -22,28 +20,25 @@ type ServerOptions struct {
 }
 
 func StartServer(options ServerOptions) {
-	var staticFS = http.FS(staticFiles)
+	staticFilesRoot, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		panic(err)
+	}
+
+	var staticFS = http.FS(staticFilesRoot)
 	fs := http.FileServer(staticFS)
 
-	http.Handle("/static/", fs)
-	http.Handle("/", indexHandler(options))
+	if !isDevMode {
+		http.Handle("/", fs)
+	}
 
 	http.HandleFunc("/api/translate", translationHandler(options))
 
 	log.Println("Listening on :5322...")
 	// start the server
-	err := http.ListenAndServe(":5322", nil)
+	err = http.ListenAndServe(":5322", nil)
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-func indexHandler(options ServerOptions) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		var path = req.URL.Path
-		log.Println("Serving request for path", path)
-		w.Header().Add("Content-Type", "text/html")
-		w.Write(indexHTML)
 	}
 }
 
