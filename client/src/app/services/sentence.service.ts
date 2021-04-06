@@ -84,16 +84,11 @@ export class SentenceService {
 
     this.sentences.splice(index, 1);
 
-    // if we deleted last sentence - adjusting currentIndex
-    if (
-      index < this.currentIndex ||
-      this.sentences.length === 0 ||
-      this.currentIndex === this.sentences.length
-    ) {
-      this.currentIndex--;
-    }
+    this.currentIndex =
+      index > 0 || (index === 0 && this.sentences.length === 0)
+        ? this.currentIndex - 1
+        : this.currentIndex; // nessesary, to emit correct data
 
-    this.currentSencenceSubject.next(this.currentSentence);
     this.totalSentencesSubject.next(this.sentences.length);
   }
 
