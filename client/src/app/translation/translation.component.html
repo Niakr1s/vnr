@@ -1,12 +1,12 @@
 <div class="bottom translation" *ngIf="sentence">
   <div *ngFor="let item of sentence!.translations | keyvalue">
     <div *ngIf="languages[item.key]">
-      <span>{{ item.key }}</span>
-      <div *ngIf="!!item.value.error; else translation">
+      <span class="label">{{ item.key }}</span>
+      <span *ngIf="!!item.value.error; else translation">
         >{{ item.value.error }}
-      </div>
+      </span>
       <ng-template #translation>
-        <div>{{ item.value.translation }}</div>
+        <span>{{ item.value.translation }}</span>
       </ng-template>
     </div>
   </div>
