@@ -69,7 +69,6 @@ export class SentenceService {
       this.deleteSentenceAt(0);
     }
 
-    this.currentSencenceSubject.next(sentence);
     this.totalSentencesSubject.next(this.sentences.length);
   }
 
