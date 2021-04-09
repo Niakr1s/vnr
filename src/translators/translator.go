@@ -30,6 +30,7 @@ type TranslationResult struct {
 
 type Translator interface {
 	GetTranslation(translationOptions TranslationOptions) (TranslationResult, error)
+	GetLanguages() ([]string, error)
 }
 
 type GetTranslatorOptions struct {

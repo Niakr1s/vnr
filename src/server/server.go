@@ -35,7 +35,7 @@ func StartServer(options ServerOptions) {
 
 	for name, translator := range options.Translators {
 		http.HandleFunc(fmt.Sprintf("/api/translate/%s", name), translationHandler(translator))
-
+		http.HandleFunc(fmt.Sprintf("/api/langs/%s", name), langsHandler(translator))
 	}
 
 	log.Printf("Listening on %s...", options.Port)
@@ -65,6 +65,17 @@ func knownTranslationsHandler(translatorNames []string) http.HandlerFunc {
 	}
 }
 
+func langsHandler(translator translators.Translator) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		langs, err := translator.GetLanguages()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		writeJson(langs, w)
+	}
+}
+
 func translationHandler(translator translators.Translator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		translationOptions := translationOptionsFromQuery(r.URL.Query())
@@ -82,6 +93,15 @@ func translationHandler(translator translators.Translator) http.HandlerFunc {
 		}
 		w.Write(translationResultJson)
 	}
+}
+
+func writeJson(obj interface{}, w http.ResponseWriter) {
+	translationResultJson, err := json.Marshal(obj)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(translationResultJson)
 }
 
 func translationOptionsFromQuery(query url.Values) translators.TranslationOptions {
