@@ -8,3 +8,16 @@ func SliceContainsString(s []string, e string) bool {
 	}
 	return false
 }
+
+func RemoveDuplicates(arr []string) []string {
+	set := map[string]struct{}{}
+
+	for _, s := range arr {
+		set[s] = struct{}{}
+	}
+	res := []string{}
+	for lang := range set {
+		res = append(res, lang)
+	}
+	return res
+}
