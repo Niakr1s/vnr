@@ -13,10 +13,9 @@ import (
 	"vnr/src/translators"
 )
 
-var headlessFlag = flag.Bool("headless", true, "chrome headless mode")
-var translatorFlag = flag.String("translator", translators.KnownTranslators[0], "translator")
-
 func main() {
+	var headlessFlag = flag.Bool("headless", true, "chrome headless mode")
+	var translatorFlag = flag.String("translator", translators.KnownTranslators[0], "translator")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
