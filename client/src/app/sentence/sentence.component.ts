@@ -16,7 +16,6 @@ export class SentenceComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.sentenceSub = this.sentenceService.currentSentence$.subscribe({
       next: (sentence) => {
-        console.log(sentence);
         this.sentence = sentence;
       },
     });

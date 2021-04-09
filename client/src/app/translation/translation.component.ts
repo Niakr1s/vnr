@@ -29,7 +29,6 @@ export class TranslationComponent implements OnInit, OnDestroy {
     this.subs.push(
       this.sentenceService.currentSentence$.subscribe({
         next: (sentence) => {
-          console.log(sentence);
           this.sentence = sentence;
         },
       })
