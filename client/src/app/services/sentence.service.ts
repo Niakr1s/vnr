@@ -11,6 +11,7 @@ import { TranslationService } from './translation.service';
 export class SentenceService {
   private sentences: Sentence[] = [];
   private maxSentences = 99;
+  private sentenceCounter = 0;
 
   private _currentIndex = -1;
   private get currentIndex(): number {
@@ -38,6 +39,13 @@ export class SentenceService {
     return this.totalSentencesSubject.asObservable();
   }
 
+  private sentenceCounterSubject = new BehaviorSubject<number>(
+    this.sentenceCounter
+  );
+  get sentenceCounter$(): Observable<number> {
+    return this.sentenceCounterSubject.asObservable();
+  }
+
   get currentSentence(): Sentence | null {
     return this.sentences[this.currentIndex];
   }
@@ -63,6 +71,10 @@ export class SentenceService {
 
   private pushSentence(sentence: Sentence): void {
     this.sentences.push(sentence);
+
+    this.sentenceCounter++;
+    this.sentenceCounterSubject.next(this.sentenceCounter);
+
     this.currentIndex = this.sentences.length - 1;
 
     if (this.sentences.length > this.maxSentences) {

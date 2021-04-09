@@ -10,6 +10,7 @@ import { SentenceService } from '../services/sentence.service';
 export class ProgressComponent implements OnInit, OnDestroy {
   total!: number;
   current!: number;
+  counter!: number;
 
   subs: Subscription[] = [];
 
@@ -27,6 +28,13 @@ export class ProgressComponent implements OnInit, OnDestroy {
       this.sentenceService.currentIndex$.subscribe({
         next: (current) => {
           this.current = current;
+        },
+      })
+    );
+    this.subs.push(
+      this.sentenceService.sentenceCounter$.subscribe({
+        next: (counter) => {
+          this.counter = counter;
         },
       })
     );
