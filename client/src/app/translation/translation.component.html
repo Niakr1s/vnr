@@ -1,13 +1,16 @@
 <div class="bottom translation" *ngIf="sentence && translator">
   <div *ngFor="let lang of translator!.getSelectedLangs()">
     <ng-container *ngIf="!!getTranslation(lang)">
-      <span class="label">{{ lang }}</span>
-      <span *ngIf="!!getTranslation(lang)!.error; else translation">
+      <span class="label">
+        {{ lang }}
+      </span>
+      <span *ngIf="getTranslation(lang)!.pending">loading...</span>
+      <span *ngIf="!!getTranslation(lang)!.error">
         >{{ getTranslation(lang)!.error }}
       </span>
-      <ng-template #translation>
-        <span>{{ getTranslation(lang)!.translation }}</span>
-      </ng-template>
+      <span *ngIf="!!getTranslation(lang)!.translation">
+        {{ getTranslation(lang)!.translation }}
+      </span>
     </ng-container>
   </div>
 </div>

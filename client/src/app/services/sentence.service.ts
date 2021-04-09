@@ -123,13 +123,20 @@ export class SentenceService {
     sentence: Sentence,
     tos: string[]
   ): void {
-    tos.forEach((to) =>
-      this.translationService
-        .translate(translator, sentence, to)
-        .then((translation) => {
-          this.setTranslation(translator, sentence.id, translation);
-        })
-    );
+    tos.forEach((to) => {
+      {
+        this.setTranslation(
+          translator,
+          sentence.id,
+          Translation.createPending(to)
+        );
+        this.translationService
+          .translate(translator, sentence, to)
+          .then((translation) => {
+            this.setTranslation(translator, sentence.id, translation);
+          });
+      }
+    });
   }
 
   private setTranslation(
