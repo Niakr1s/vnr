@@ -128,10 +128,10 @@ export class SentenceService {
         this.translationService.translate(translator, sentence, to)
       )
     );
-    this.setTranslation(translator, sentence.id, translations);
+    this.setTranslations(translator, sentence.id, translations);
   }
 
-  private setTranslation(
+  private setTranslations(
     translator: string,
     id: number,
     translations: Translation[]
