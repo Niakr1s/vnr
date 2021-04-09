@@ -66,6 +66,12 @@ export class SentenceService {
     this.translatorRepo.translators$.subscribe({
       next: (translators) => {
         this.currentTranslator = translators?.getSelectedTranslator();
+        this.translateMissedLanguages();
+      },
+    });
+    this.currentSentence$.subscribe({
+      next: () => {
+        this.translateMissedLanguages();
       },
     });
     clipboardService.clipboard.subscribe({
@@ -116,6 +122,24 @@ export class SentenceService {
         : this.currentIndex; // nessesary, to emit correct data
 
     this.totalSentencesSubject.next(this.sentences.length);
+  }
+
+  private translateMissedLanguages(): void {
+    if (!this.currentTranslator || !this.currentSentence) {
+      return;
+    }
+    const { langs, name } = this.currentTranslator;
+
+    const tos: string[] = [];
+    for (const lang of langs) {
+      if (
+        lang.selected &&
+        !this.currentSentence.hasTranslation(name, lang.name)
+      ) {
+        tos.push(lang.name);
+      }
+    }
+    this.translate(name, this.currentSentence, tos);
   }
 
   private translate(

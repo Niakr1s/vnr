@@ -18,4 +18,10 @@ export class Sentence {
     this.translations[translator] ||= {};
     this.translations[translator][translation.to] = translation;
   }
+
+  hasTranslation(translator: string, to: string): boolean {
+    return (
+      translator in this.translations && to in this.translations[translator]
+    );
+  }
 }
