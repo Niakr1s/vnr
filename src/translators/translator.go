@@ -1,25 +1,14 @@
 package translators
 
 import (
-	"context"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"time"
-
-	"github.com/chromedp/chromedp"
+	"vnr/src/server/chrome"
 )
-
-type TranslatorInitOptions struct {
-	Headless bool
-}
 
 type TranslationOptions struct {
 	From     string `json:"from"`
 	To       string `json:"to"`
 	Sentence string `json:"sentence"`
-
-	Timeont time.Duration `json:"-"`
 }
 
 func NewTranslationOptions(sentence string) TranslationOptions {
@@ -27,8 +16,6 @@ func NewTranslationOptions(sentence string) TranslationOptions {
 		From:     "auto",
 		To:       "auto",
 		Sentence: sentence,
-
-		Timeont: time.Second * 15,
 	}
 }
 
@@ -38,60 +25,19 @@ type TranslationResult struct {
 }
 
 type Translator interface {
-	Init(ctx context.Context, options TranslatorInitOptions) error
 	GetTranslation(translationOptions TranslationOptions) (TranslationResult, error)
 }
 
-func GetTranslator(translator string) (Translator, error) {
-	switch translator {
+type GetTranslatorOptions struct {
+	Translator string
+	Chrome     *chrome.Chrome
+}
+
+func GetTranslator(options GetTranslatorOptions) (Translator, error) {
+	switch options.Translator {
 	case "deepl":
-		return NewDeeplTranslator(), nil
+		return NewDeeplTranslator(options.Chrome), nil
 	default:
-		return nil, fmt.Errorf("invalid translator: got: %s, expected: one of %s", translator, KnownTranslators)
+		return nil, fmt.Errorf("invalid translator: got: %s, expected: one of %s", options.Translator, KnownTranslators)
 	}
-}
-
-type BaseChromeTranslator struct {
-	allocCtx context.Context
-	ctx      context.Context
-}
-
-func (t *BaseChromeTranslator) Init(ctx context.Context, options TranslatorInitOptions) error {
-	dir, err := ioutil.TempDir("", "vnr")
-	if err != nil {
-		return err
-	}
-
-	go func() {
-		for range ctx.Done() {
-			fmt.Printf("DONE")
-		}
-	}()
-
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.DisableGPU,
-		chromedp.UserDataDir(dir),
-
-		// without this flag headless mode is very slow
-		chromedp.Flag("proxy-server", ""),
-		chromedp.Flag("headless", options.Headless),
-	)
-
-	t.allocCtx, _ = chromedp.NewExecAllocator(ctx, opts...)
-
-	// t.ctx, _ = t.getCtx()
-	ctx, _ = chromedp.NewContext(t.allocCtx,
-		chromedp.WithLogf(log.Printf),
-	)
-	t.ctx = ctx
-	// defer cancel()
-	if err := chromedp.Run(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *BaseChromeTranslator) getCtx() (context.Context, context.CancelFunc) {
-	return chromedp.NewContext(t.ctx)
 }

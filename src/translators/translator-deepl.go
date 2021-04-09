@@ -1,29 +1,24 @@
 package translators
 
 import (
-	"context"
 	"fmt"
 	"strings"
+	"vnr/src/server/chrome"
 
 	"github.com/chromedp/chromedp"
 )
 
 type DeeplTranslator struct {
-	*BaseChromeTranslator
+	chrome *chrome.Chrome
 }
 
-func NewDeeplTranslator() *DeeplTranslator {
+func NewDeeplTranslator(chrome *chrome.Chrome) *DeeplTranslator {
 	return &DeeplTranslator{
-		BaseChromeTranslator: &BaseChromeTranslator{},
+		chrome: chrome,
 	}
 }
 
 func (dt *DeeplTranslator) GetTranslation(translationOptions TranslationOptions) (TranslationResult, error) {
-	taskCtx, cancel := dt.getCtx()
-	defer cancel()
-	taskCtx, cancel = context.WithTimeout(taskCtx, translationOptions.Timeont)
-	defer cancel()
-
 	translationResult := TranslationResult{TranslationOptions: translationOptions}
 
 	url := dt.translationOptionsToUrl(translationOptions)
@@ -33,11 +28,13 @@ func (dt *DeeplTranslator) GetTranslation(translationOptions TranslationOptions)
 		chromedp.WaitVisible("lmt__rating-up"),
 		chromedp.TextContent("#target-dummydiv", &translationResult.Translation),
 	}
-	err := chromedp.Run(taskCtx, actions...)
+	err := dt.chrome.Run(actions...)
+	if err != nil {
+		return TranslationResult{}, err
+	}
 
 	translationResult.Translation = strings.TrimSpace(translationResult.Translation)
-
-	return translationResult, err
+	return translationResult, nil
 }
 
 func (dt *DeeplTranslator) translationOptionsToUrl(translationOptions TranslationOptions) string {

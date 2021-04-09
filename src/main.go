@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 	"vnr/src/server"
+	"vnr/src/server/chrome"
 	"vnr/src/translators"
 )
 
@@ -26,52 +27,27 @@ func main() {
 	defer cancelAndWait()
 	handleOsInterrupt(cancelAndWait)
 
-	translator, err := translators.GetTranslator(*translatorFlag)
+	chrome, err := chrome.NewChrome(ctx, chrome.ChromeOptions{
+		Headless: *headlessFlag,
+		Timeout:  time.Second * 15,
+	})
+
+	if err != nil {
+		log.Fatalf("couldn't initialize chrome: %v", err)
+	}
+
+	translator, err := translators.GetTranslator(translators.GetTranslatorOptions{
+		Translator: *translatorFlag,
+		Chrome:     chrome,
+	})
 	if err != nil {
 		panic(err)
 	}
-
-	translator.Init(ctx, translators.TranslatorInitOptions{
-		Headless: *headlessFlag,
-	})
 
 	server.StartServer(server.ServerOptions{
 		Port:       3000,
 		Translator: translator,
 	})
-
-	// words := []string{
-	// 	"こんいちは",
-	// 	"hello",
-	// 	"schwartz",
-	// }
-	// wg := sync.WaitGroup{}
-	// wg.Add(len(words))
-
-	// log.Printf("fetching translations...")
-	// for i, word := range words {
-	// 	word := word
-	// 	i := i
-	// 	go func() {
-	// 		defer wg.Done()
-
-	// 		translationOptions := translators.NewTranslationOptions(word)
-	// 		translationOptions.To = "ru"
-	// 		if i == 1 {
-	// 			translationOptions.Timeont = time.Millisecond * 1000
-	// 		}
-
-	// 		translation, err := translator.GetTranslation(translationOptions)
-	// 		if err != nil {
-	// 			log.Printf("wrror while fetching translation, %s", err)
-	// 		} else {
-	// 			log.Printf("got translation: %s => %s", translation.TranslationOptions, translation.Translation)
-	// 		}
-	// 	}()
-	// }
-
-	// wg.Wait()
-	// log.Printf("translations fetched")
 }
 
 func handleOsInterrupt(fns ...func()) {
