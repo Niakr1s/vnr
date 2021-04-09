@@ -32,7 +32,7 @@ func StartServer(options ServerOptions) {
 		http.Handle("/", fs)
 	}
 
-	http.HandleFunc("/api/translate", translationHandler(options))
+	http.HandleFunc("/api/translate", translationHandler(options.Translator))
 
 	log.Println("Listening on :5322...")
 	// start the server
@@ -42,10 +42,10 @@ func StartServer(options ServerOptions) {
 	}
 }
 
-func translationHandler(options ServerOptions) http.HandlerFunc {
+func translationHandler(translator translators.Translator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		translationOptions := translationOptionsFromQuery(r.URL.Query())
-		translationResult, err := options.Translator.GetTranslation(translationOptions)
+		translationResult, err := translator.GetTranslation(translationOptions)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
