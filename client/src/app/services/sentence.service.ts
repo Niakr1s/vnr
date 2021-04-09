@@ -142,8 +142,7 @@ export class SentenceService {
       return;
     }
 
-    sentence.translations[translator] ||= {};
-    sentence.translations[translator][translation.to] = translation;
+    sentence.setTranslation(translator, translation);
 
     if (this.isCurrent(sentence)) {
       this.currentSencenceSubject.next(sentence);

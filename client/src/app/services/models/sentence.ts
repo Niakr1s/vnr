@@ -13,4 +13,9 @@ export class Sentence {
     s.id = Sentence.id++;
     return s;
   }
+
+  setTranslation(translator: string, translation: Translation): void {
+    this.translations[translator] ||= {};
+    this.translations[translator][translation.to] = translation;
+  }
 }
