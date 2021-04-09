@@ -79,14 +79,6 @@ export class SentenceService {
       next: async (s) => {
         const sentence = Sentence.create(s);
         this.pushSentence(sentence);
-
-        if (this.currentTranslator) {
-          this.translate(
-            this.currentTranslator.name,
-            sentence,
-            this.currentTranslator.getSelectedLangs()
-          );
-        }
       },
     });
   }
