@@ -28,9 +28,7 @@ func StartServer(options ServerOptions) {
 	var staticFS = http.FS(staticFilesRoot)
 	fs := http.FileServer(staticFS)
 
-	if !isDevMode {
-		http.Handle("/", fs)
-	}
+	http.Handle("/", fs)
 
 	http.HandleFunc("/api/translate", translationHandler(options.Translator))
 
