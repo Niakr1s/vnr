@@ -1,12 +1,12 @@
-<div class="langs">
+<div class="langs" *ngIf="translator">
   <span>langs:</span>
-  <ng-container class="langs" *ngFor="let item of languages | keyvalue">
+  <ng-container class="langs" *ngFor="let lang of translator!.langs">
     <input
-      [name]="item.key"
+      [name]="lang.name"
       type="checkbox"
-      [checked]="item.value"
-      [title]="item.key"
-      (click)="onToggle(item.key)"
+      [checked]="lang.selected"
+      [title]="lang.name"
+      (click)="onToggle(lang.name)"
     />
   </ng-container>
 </div>

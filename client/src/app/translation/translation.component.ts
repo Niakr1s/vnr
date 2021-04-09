@@ -1,8 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Languages, LanguageService } from '../services/language.service';
 import { Sentence } from '../services/models/sentence';
 import { SentenceService } from '../services/sentence.service';
+import {
+  Translator,
+  TranslatorsRepoService,
+} from '../services/translators-repo.service';
 
 @Component({
   selector: 'app-translation',
@@ -11,13 +14,13 @@ import { SentenceService } from '../services/sentence.service';
 })
 export class TranslationComponent implements OnInit, OnDestroy {
   sentence!: Sentence | null;
-  languages!: Languages;
+  translator?: Translator;
 
   private subs: Subscription[] = [];
 
   constructor(
     private sentenceService: SentenceService,
-    private languageService: LanguageService
+    private translatorsRepo: TranslatorsRepoService // private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
@@ -29,9 +32,9 @@ export class TranslationComponent implements OnInit, OnDestroy {
       })
     );
     this.subs.push(
-      this.languageService.languages$.subscribe({
-        next: (l) => {
-          this.languages = l;
+      this.translatorsRepo.translators$.subscribe({
+        next: (t) => {
+          this.translator = t?.getSelectedTranslator();
         },
       })
     );

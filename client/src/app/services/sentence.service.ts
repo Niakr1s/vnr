@@ -4,6 +4,7 @@ import { ClipboardService } from './clipboard.service';
 import { Sentence } from './models/sentence';
 import { Translation } from './models/translation';
 import { TranslationService } from './translation.service';
+import { Translator, TranslatorsRepoService } from './translators-repo.service';
 
 @Injectable({
   providedIn: 'root',
@@ -55,16 +56,30 @@ export class SentenceService {
     return this.currentSencenceSubject.asObservable();
   }
 
+  private currentTranslator?: Translator;
+
   constructor(
     clipboardService: ClipboardService,
-    private translationService: TranslationService
+    private translationService: TranslationService,
+    private translatorRepo: TranslatorsRepoService
   ) {
+    this.translatorRepo.translators$.subscribe({
+      next: (translators) => {
+        this.currentTranslator = translators?.getSelectedTranslator();
+      },
+    });
     clipboardService.clipboard.subscribe({
       next: async (s) => {
         const sentence = Sentence.create(s);
         this.pushSentence(sentence);
 
-        await this.translate(sentence, ['en', 'ru']);
+        if (this.currentTranslator) {
+          await this.translate(
+            this.currentTranslator.name,
+            sentence,
+            this.currentTranslator.getSelectedLangs()
+          );
+        }
       },
     });
   }
@@ -103,9 +118,15 @@ export class SentenceService {
     this.totalSentencesSubject.next(this.sentences.length);
   }
 
-  private async translate(sentence: Sentence, tos: string[]): Promise<void> {
+  private async translate(
+    translator: string,
+    sentence: Sentence,
+    tos: string[]
+  ): Promise<void> {
     const translations = await Promise.all(
-      tos.map((to) => this.translationService.translate(sentence, to))
+      tos.map((to) =>
+        this.translationService.translate(translator, sentence, to)
+      )
     );
     this.setTranslation(sentence.id, translations);
   }
