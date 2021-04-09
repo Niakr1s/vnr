@@ -14,7 +14,7 @@ import (
 var staticFiles embed.FS
 
 type ServerOptions struct {
-	Port int
+	Port string
 
 	Translator translators.Translator
 }
@@ -34,9 +34,9 @@ func StartServer(options ServerOptions) {
 
 	http.HandleFunc("/api/translate", translationHandler(options.Translator))
 
-	log.Println("Listening on :5322...")
+	log.Printf("Listening on %s...", options.Port)
 	// start the server
-	err = http.ListenAndServe(":5322", nil)
+	err = http.ListenAndServe(options.Port, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

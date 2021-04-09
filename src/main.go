@@ -45,9 +45,17 @@ func main() {
 	}
 
 	server.StartServer(server.ServerOptions{
-		Port:       3000,
+		Port:       env("PORT", ":5322"),
 		Translator: translator,
 	})
+}
+
+func env(k string, defaultV string) string {
+	v, ok := os.LookupEnv(k)
+	if !ok {
+		return defaultV
+	}
+	return v
 }
 
 func handleOsInterrupt(fns ...func()) {
