@@ -178,7 +178,9 @@ export class SentenceService {
     return currentSentence != null && currentSentence === sentence;
   }
 
-  deleteCurrentSentence(): void {}
+  deleteCurrentSentence(): void {
+    this.deleteSentenceAt(this.currentIndex);
+  }
 
   hasPrev(): boolean {
     if (this.sentences.length === 0) {
