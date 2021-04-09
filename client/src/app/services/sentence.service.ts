@@ -46,7 +46,7 @@ export class SentenceService {
     return this.sentenceCounterSubject.asObservable();
   }
 
-  get currentSentence(): Sentence | null {
+  private get currentSentence(): Sentence | null {
     return this.sentences[this.currentIndex];
   }
 
