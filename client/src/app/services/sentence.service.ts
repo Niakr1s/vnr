@@ -118,17 +118,18 @@ export class SentenceService {
     this.totalSentencesSubject.next(this.sentences.length);
   }
 
-  private async translate(
+  private translate(
     translator: string,
     sentence: Sentence,
     tos: string[]
-  ): Promise<void> {
-    const translations = await Promise.all(
-      tos.map((to) =>
-        this.translationService.translate(translator, sentence, to)
-      )
+  ): void {
+    tos.forEach((to) =>
+      this.translationService
+        .translate(translator, sentence, to)
+        .then((translation) => {
+          this.setTranslation(translator, sentence.id, translation);
+        })
     );
-    this.setTranslations(translator, sentence.id, translations);
   }
 
   private setTranslation(
@@ -146,16 +147,6 @@ export class SentenceService {
 
     if (this.isCurrent(sentence)) {
       this.currentSencenceSubject.next(sentence);
-    }
-  }
-
-  private setTranslations(
-    translator: string,
-    id: number,
-    translations: Translation[]
-  ): void {
-    for (const translation of translations) {
-      this.setTranslation(translator, id, translation);
     }
   }
 
