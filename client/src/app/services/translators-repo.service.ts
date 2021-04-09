@@ -21,7 +21,10 @@ export class TranslatorsRepoService {
   constructor(private http: HttpClient) {
     this.getKnownTranslators();
     this.translators$.subscribe({
-      next: (t) => (this._translators = t),
+      next: (t) => {
+        this._translators = t;
+        t?.save();
+      },
     });
   }
 
@@ -57,6 +60,7 @@ export class TranslatorsRepoService {
       );
       const translators = Translators.create(translatorList);
       console.log('got translators', translators);
+      translators.load();
       this.translatorsSubject.next(translators);
     } catch (e) {
       console.error(`couldn't get known translators`, e);

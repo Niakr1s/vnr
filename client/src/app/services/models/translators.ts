@@ -1,3 +1,4 @@
+import { plainToClass } from 'class-transformer';
 import { Lang } from './lang';
 
 export class Translator {
@@ -21,6 +22,8 @@ export class Translator {
 }
 
 export class Translators {
+  private static saveKey = 'translators';
+
   translators!: Translator[];
   private selectedTranslator!: string;
 
@@ -39,5 +42,40 @@ export class Translators {
 
   findTranslator(name: string): Translator | undefined {
     return this.translators.find((t) => t.name === name);
+  }
+
+  save(): void {
+    localStorage.setItem(Translators.saveKey, JSON.stringify(this));
+  }
+
+  load(): void {
+    const savedTranslatorJson = localStorage.getItem(Translators.saveKey);
+    if (!savedTranslatorJson) {
+      return;
+    }
+    const savedTranslator = plainToClass(
+      Translators,
+      JSON.parse(savedTranslatorJson)
+    );
+    this.mergeWithSavedTranslator(savedTranslator);
+  }
+
+  private mergeWithSavedTranslator(mergeWith: Translators): void {
+    for (const t of mergeWith.translators) {
+      const translator = this.findTranslator(t.name);
+      if (!translator) {
+        continue;
+      }
+      for (const l of t.langs) {
+        const lang = translator.findLang(l.name);
+        if (!lang) {
+          continue;
+        }
+        lang.selected = l.selected;
+      }
+    }
+    if (this.findTranslator(mergeWith.selectedTranslator)) {
+      this.selectedTranslator = mergeWith.selectedTranslator;
+    }
   }
 }
