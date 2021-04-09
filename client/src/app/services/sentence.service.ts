@@ -74,7 +74,7 @@ export class SentenceService {
         this.pushSentence(sentence);
 
         if (this.currentTranslator) {
-          await this.translate(
+          this.translate(
             this.currentTranslator.name,
             sentence,
             this.currentTranslator.getSelectedLangs()
