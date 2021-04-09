@@ -131,10 +131,10 @@ export class SentenceService {
     this.setTranslations(translator, sentence.id, translations);
   }
 
-  private setTranslations(
+  private setTranslation(
     translator: string,
     id: number,
-    translations: Translation[]
+    translation: Translation
   ): void {
     const sentence = this.sentences.find((s) => s.id === id);
     if (!sentence) {
@@ -142,13 +142,20 @@ export class SentenceService {
     }
 
     sentence.translations[translator] ||= {};
-
-    for (const translation of translations) {
-      sentence.translations[translator][translation.to] = translation;
-    }
+    sentence.translations[translator][translation.to] = translation;
 
     if (this.isCurrent(sentence)) {
       this.currentSencenceSubject.next(sentence);
+    }
+  }
+
+  private setTranslations(
+    translator: string,
+    id: number,
+    translations: Translation[]
+  ): void {
+    for (const translation of translations) {
+      this.setTranslation(translator, id, translation);
     }
   }
 
@@ -157,9 +164,7 @@ export class SentenceService {
     return currentSentence != null && currentSentence === sentence;
   }
 
-  deleteCurrentSentence(): void {
-    this.deleteSentenceAt(this.currentIndex);
-  }
+  deleteCurrentSentence(): void {}
 
   hasPrev(): boolean {
     if (this.sentences.length === 0) {
