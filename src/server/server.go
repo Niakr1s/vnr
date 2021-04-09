@@ -30,6 +30,8 @@ func StartServer(options ServerOptions) {
 
 	http.Handle("/", fs)
 
+	http.HandleFunc("/api/knownTranslators", knownTranslationsHandler())
+
 	http.HandleFunc("/api/translate", translationHandler(options.Translator))
 
 	log.Printf("Listening on %s...", options.Port)
@@ -37,6 +39,17 @@ func StartServer(options ServerOptions) {
 	err = http.ListenAndServe(options.Port, nil)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func knownTranslationsHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := json.Marshal(translators.KnownTranslators)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write(data)
 	}
 }
 
