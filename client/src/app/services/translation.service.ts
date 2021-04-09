@@ -20,7 +20,7 @@ export class TranslationService {
     try {
       const res = await this.http
         .get<TranslationResponse>(
-          `api/translate?sentence=${sentence.sentence}&to=${to}`
+          `api/translate/deepl?sentence=${sentence.sentence}&to=${to}`
         )
         .toPromise();
       return Translation.create(to, res.translation);

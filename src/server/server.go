@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
@@ -16,7 +17,7 @@ var staticFiles embed.FS
 type ServerOptions struct {
 	Port string
 
-	Translator translators.Translator
+	Translators map[string]translators.Translator
 }
 
 func StartServer(options ServerOptions) {
@@ -30,9 +31,12 @@ func StartServer(options ServerOptions) {
 
 	http.Handle("/", fs)
 
-	http.HandleFunc("/api/knownTranslators", knownTranslationsHandler())
+	http.HandleFunc("/api/knownTranslators", knownTranslationsHandler(getTranslatorNames(options.Translators)))
 
-	http.HandleFunc("/api/translate", translationHandler(options.Translator))
+	for name, translator := range options.Translators {
+		http.HandleFunc(fmt.Sprintf("/api/translate/%s", name), translationHandler(translator))
+
+	}
 
 	log.Printf("Listening on %s...", options.Port)
 	// start the server
@@ -42,9 +46,17 @@ func StartServer(options ServerOptions) {
 	}
 }
 
-func knownTranslationsHandler() http.HandlerFunc {
+func getTranslatorNames(m map[string]translators.Translator) []string {
+	res := make([]string, 0)
+	for k := range m {
+		res = append(res, k)
+	}
+	return res
+}
+
+func knownTranslationsHandler(translatorNames []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := json.Marshal(translators.KnownTranslators)
+		data, err := json.Marshal(translatorNames)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

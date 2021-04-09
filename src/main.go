@@ -43,9 +43,13 @@ func main() {
 		panic(err)
 	}
 
+	translators := map[string]translators.Translator{
+		*translatorFlag: translator,
+	}
+
 	server.StartServer(server.ServerOptions{
-		Port:       env("PORT", ":5322"),
-		Translator: translator,
+		Port:        env("PORT", ":5322"),
+		Translators: translators,
 	})
 }
 
