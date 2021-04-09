@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Sentence } from '../services/models/sentence';
+import { Translation } from '../services/models/translation';
 import { SentenceService } from '../services/sentence.service';
 import {
   Translator,
@@ -40,6 +41,17 @@ export class TranslationComponent implements OnInit, OnDestroy {
         },
       })
     );
+  }
+
+  getTranslation(lang: string): Translation | undefined {
+    if (!this.translator) {
+      return;
+    }
+    const translations = this.sentence?.translations[this.translator.name];
+    if (!translations) {
+      return;
+    }
+    return translations[lang];
   }
 
   ngOnDestroy(): void {

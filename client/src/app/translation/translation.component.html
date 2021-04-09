@@ -1,13 +1,13 @@
 <div class="bottom translation" *ngIf="sentence && translator">
-  <div *ngFor="let item of sentence!.translations[translator!.name] | keyvalue">
-    <div *ngIf="translator!.findLang(item.key)">
-      <span class="label">{{ item.key }}</span>
-      <span *ngIf="!!item.value.error; else translation">
-        >{{ item.value.error }}
+  <div *ngFor="let lang of translator!.getSelectedLangs()">
+    <ng-container *ngIf="!!getTranslation(lang)">
+      <span class="label">{{ lang }}</span>
+      <span *ngIf="!!getTranslation(lang)!.error; else translation">
+        >{{ getTranslation(lang)!.error }}
       </span>
       <ng-template #translation>
-        <span>{{ item.value.translation }}</span>
+        <span>{{ getTranslation(lang)!.translation }}</span>
       </ng-template>
-    </div>
+    </ng-container>
   </div>
 </div>
