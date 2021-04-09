@@ -5,6 +5,10 @@ import (
 	"vnr/src/server/chrome"
 )
 
+var KnownTranslators = []string{
+	"deepl",
+}
+
 type TranslationOptions struct {
 	From     string `json:"from"`
 	To       string `json:"to"`
@@ -29,15 +33,26 @@ type Translator interface {
 }
 
 type GetTranslatorOptions struct {
-	Translator string
-	Chrome     *chrome.Chrome
+	Chrome *chrome.Chrome
 }
 
-func GetTranslator(options GetTranslatorOptions) (Translator, error) {
-	switch options.Translator {
+func GetTranslator(name string, options GetTranslatorOptions) (Translator, error) {
+	switch name {
 	case "deepl":
 		return NewDeeplTranslator(options.Chrome), nil
 	default:
-		return nil, fmt.Errorf("invalid translator: got: %s, expected: one of %s", options.Translator, KnownTranslators)
+		return nil, fmt.Errorf("invalid translator: got: %s, expected: one of %s", name, KnownTranslators)
 	}
+}
+
+func GetAllKnownTranslators(options GetTranslatorOptions) (map[string]Translator, error) {
+	res := map[string]Translator{}
+	for _, name := range KnownTranslators {
+		translator, err := GetTranslator(name, options)
+		if err != nil {
+			return nil, err
+		}
+		res[name] = translator
+	}
+	return res, nil
 }

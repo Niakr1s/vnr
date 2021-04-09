@@ -15,7 +15,6 @@ import (
 
 func main() {
 	var headlessFlag = flag.Bool("headless", true, "chrome headless mode")
-	var translatorFlag = flag.String("translator", translators.KnownTranslators[0], "translator")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -30,26 +29,20 @@ func main() {
 		Headless: *headlessFlag,
 		Timeout:  time.Second * 15,
 	})
-
 	if err != nil {
 		log.Fatalf("couldn't initialize chrome: %v", err)
 	}
 
-	translator, err := translators.GetTranslator(translators.GetTranslatorOptions{
-		Translator: *translatorFlag,
-		Chrome:     chrome,
+	transl, err := translators.GetAllKnownTranslators(translators.GetTranslatorOptions{
+		Chrome: chrome,
 	})
 	if err != nil {
-		panic(err)
-	}
-
-	translators := map[string]translators.Translator{
-		*translatorFlag: translator,
+		log.Fatalf("couldn't get translators: %v", err)
 	}
 
 	server.StartServer(server.ServerOptions{
 		Port:        env("PORT", ":5322"),
-		Translators: translators,
+		Translators: transl,
 	})
 }
 
