@@ -2,10 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Sentence } from './models/sentence';
 import { Translation } from './models/translation';
-import {
-  Translators,
-  TranslatorsRepoService,
-} from './translators-repo.service';
+import { Translators } from './models/translators';
+import { TranslatorsRepoService } from './translators-repo.service';
 
 interface TranslationResponse {
   from: string;

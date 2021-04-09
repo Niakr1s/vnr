@@ -2,11 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Sentence } from '../services/models/sentence';
 import { Translation } from '../services/models/translation';
+import { Translator } from '../services/models/translators';
 import { SentenceService } from '../services/sentence.service';
-import {
-  Translator,
-  TranslatorsRepoService,
-} from '../services/translators-repo.service';
+import { TranslatorsRepoService } from '../services/translators-repo.service';
 
 @Component({
   selector: 'app-translation',

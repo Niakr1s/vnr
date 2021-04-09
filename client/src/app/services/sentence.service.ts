@@ -3,8 +3,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { ClipboardService } from './clipboard.service';
 import { Sentence } from './models/sentence';
 import { Translation } from './models/translation';
+import { Translator } from './models/translators';
 import { TranslationService } from './translation.service';
-import { Translator, TranslatorsRepoService } from './translators-repo.service';
+import { TranslatorsRepoService } from './translators-repo.service';
 
 @Injectable({
   providedIn: 'root',

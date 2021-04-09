@@ -1,9 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import {
-  Translator,
-  TranslatorsRepoService,
-} from '../services/translators-repo.service';
+import { Translator } from '../services/models/translators';
+import { TranslatorsRepoService } from '../services/translators-repo.service';
 
 @Component({
   selector: 'app-language',
