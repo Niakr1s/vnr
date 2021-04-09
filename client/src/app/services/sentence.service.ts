@@ -128,17 +128,23 @@ export class SentenceService {
         this.translationService.translate(translator, sentence, to)
       )
     );
-    this.setTranslation(sentence.id, translations);
+    this.setTranslation(translator, sentence.id, translations);
   }
 
-  private setTranslation(id: number, translations: Translation[]): void {
+  private setTranslation(
+    translator: string,
+    id: number,
+    translations: Translation[]
+  ): void {
     const sentence = this.sentences.find((s) => s.id === id);
     if (!sentence) {
       return;
     }
 
+    sentence.translations[translator] ||= {};
+
     for (const translation of translations) {
-      sentence.translations[translation.to] = translation;
+      sentence.translations[translator][translation.to] = translation;
     }
 
     if (this.isCurrent(sentence)) {

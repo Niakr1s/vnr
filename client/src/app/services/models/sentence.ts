@@ -5,7 +5,7 @@ export class Sentence {
 
   id!: number;
   sentence!: string;
-  translations: Record<string, Translation> = {};
+  translations: Record<string, Record<string, Translation>> = {};
 
   static create(sentence: string): Sentence {
     const s = new Sentence();
