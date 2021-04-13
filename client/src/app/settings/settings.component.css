@@ -1,0 +1,39 @@
+.outer {
+  background: rgba(104, 97, 97, 0.837);
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+.inner {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 50px;
+  bottom: 50px;
+  left: 150px;
+  right: 150px;
+}
+
+.scroll {
+  margin: 20px auto;
+  width: 200px;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lang-name {
+  min-width: 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}

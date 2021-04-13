@@ -1,8 +1,9 @@
 <div class="flex">
-  <app-language></app-language>
+  <button (click)="onSettingsClick()">settings</button>
   <span class="flex-right"></span>
   <app-progress></app-progress>
   <app-control></app-control>
+  <app-settings *ngIf="settingsVisible"></app-settings>
 </div>
 
 <app-sentence></app-sentence>

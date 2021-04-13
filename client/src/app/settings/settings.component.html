@@ -1,0 +1,67 @@
+<div class="outer" #outer (click)="onOuterClick($event)">
+  <div class="inner">
+    <div class="scroll">
+      <div *ngIf="translationSettings">
+        <ng-container
+          *ngFor="let translator of translationSettings!.translators"
+        >
+          <h2 class="center flex">
+            <span> {{ translator.name }}</span>
+            <button
+              class="flex-right"
+              [disabled]="translationSettings!.isFirst(translator.name)"
+              (click)="
+                translationSettingsService.moveTranslatorUp(translator.name)
+              "
+            >
+              up
+            </button>
+            <button
+              [disabled]="translationSettings!.isLast(translator.name)"
+              (click)="
+                translationSettingsService.moveTranslatorDown(translator.name)
+              "
+            >
+              down
+            </button>
+          </h2>
+          <ul *ngFor="let lang of translator!.langs">
+            <li class="flex">
+              <span class="lang-name">{{ lang.name }}</span>
+              <input
+                class="flex-right"
+                [name]="lang.name"
+                type="checkbox"
+                [checked]="lang.selected"
+                [title]="lang.name"
+                (click)="onToggle(translator.name, lang.name)"
+              />
+              <button
+                [disabled]="translator.isFirst(lang.name)"
+                (click)="
+                  translationSettingsService.moveLangUp(
+                    translator.name,
+                    lang.name
+                  )
+                "
+              >
+                up
+              </button>
+              <button
+                [disabled]="translator.isLast(lang.name)"
+                (click)="
+                  translationSettingsService.moveLangDown(
+                    translator.name,
+                    lang.name
+                  )
+                "
+              >
+                down
+              </button>
+            </li>
+          </ul>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

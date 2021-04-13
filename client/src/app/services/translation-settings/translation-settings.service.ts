@@ -28,6 +28,28 @@ export class TranslationSettingsService {
     });
   }
 
+  moveTranslatorUp(translatorName: string): void {
+    this._translationSettings?.moveUp(translatorName);
+    this.translationSettingsSubject.next(this._translationSettings);
+  }
+
+  moveTranslatorDown(translatorName: string): void {
+    this._translationSettings?.moveDown(translatorName);
+    this.translationSettingsSubject.next(this._translationSettings);
+  }
+
+  moveLangUp(translatorName: string, langName: string): void {
+    this._translationSettings?.findTranslator(translatorName)?.moveUp(langName);
+    this.translationSettingsSubject.next(this._translationSettings);
+  }
+
+  moveLangDown(translatorName: string, langName: string): void {
+    this._translationSettings
+      ?.findTranslator(translatorName)
+      ?.moveDown(langName);
+    this.translationSettingsSubject.next(this._translationSettings);
+  }
+
   toggleLanguage(translatorName: string, langName: string): void {
     const lang = this._translationSettings
       ?.findTranslator(translatorName)

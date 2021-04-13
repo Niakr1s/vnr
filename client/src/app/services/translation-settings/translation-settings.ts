@@ -23,6 +23,41 @@ export class Translator {
   mergeWithSavedTranslator(savedTranslator: Translator): void {
     this.langs = mergeLangs(savedTranslator.langs, this.langs);
   }
+
+  moveUp(langName: string): void {
+    if (this.isFirst(langName)) {
+      return;
+    }
+    const index = this.langs.findIndex((l) => l.name === langName);
+    if (index === -1) {
+      return;
+    }
+    swap(this.langs, index, index - 1);
+  }
+
+  moveDown(langName: string): void {
+    if (this.isLast(langName)) {
+      return;
+    }
+    const index = this.langs.findIndex((l) => l.name === langName);
+    if (index === -1) {
+      return;
+    }
+    swap(this.langs, index, index + 1);
+  }
+
+  isFirst(langName: string): boolean {
+    const index = this.langs.findIndex((l) => l.name === langName);
+    return index === 0;
+  }
+
+  isLast(langName: string): boolean {
+    const index = this.langs.findIndex((l) => l.name === langName);
+    if (index === -1) {
+      return false;
+    }
+    return index === this.langs.length - 1;
+  }
 }
 
 export class TranslationSettings {
@@ -72,6 +107,41 @@ export class TranslationSettings {
       }
     }
   }
+
+  moveUp(translatorName: string): void {
+    if (this.isFirst(translatorName)) {
+      return;
+    }
+    const index = this.translators.findIndex((l) => l.name === translatorName);
+    if (index === -1) {
+      return;
+    }
+    swap(this.translators, index, index - 1);
+  }
+
+  moveDown(translatorName: string): void {
+    if (this.isLast(translatorName)) {
+      return;
+    }
+    const index = this.translators.findIndex((l) => l.name === translatorName);
+    if (index === -1) {
+      return;
+    }
+    swap(this.translators, index, index + 1);
+  }
+
+  isFirst(translatorName: string): boolean {
+    const index = this.translators.findIndex((t) => t.name === translatorName);
+    return index === 0;
+  }
+
+  isLast(translatorName: string): boolean {
+    const index = this.translators.findIndex((t) => t.name === translatorName);
+    if (index === -1) {
+      return false;
+    }
+    return index === this.translators.length - 1;
+  }
 }
 
 const findTranslator = (
@@ -103,4 +173,8 @@ export const mergeLangs = (from: Lang[], to: Lang[]): Lang[] => {
   }
 
   return res;
+};
+
+const swap = <T>(arr: T[], index1: number, index2: number): void => {
+  [arr[index1], arr[index2]] = [arr[index2], arr[index1]];
 };
