@@ -25,41 +25,25 @@
               down
             </button>
           </h2>
-          <ul *ngFor="let lang of translator!.langs">
-            <li class="flex">
-              <span class="lang-name">{{ lang.name }}</span>
-              <input
-                class="flex-right"
-                [name]="lang.name"
-                type="checkbox"
-                [checked]="lang.selected"
-                [title]="lang.name"
-                (click)="onToggle(translator.name, lang.name)"
-              />
-              <button
-                [disabled]="translator.isFirst(lang.name)"
-                (click)="
-                  translationSettingsService.moveLangUp(
-                    translator.name,
-                    lang.name
-                  )
-                "
-              >
-                up
-              </button>
-              <button
-                [disabled]="translator.isLast(lang.name)"
-                (click)="
-                  translationSettingsService.moveLangDown(
-                    translator.name,
-                    lang.name
-                  )
-                "
-              >
-                down
-              </button>
-            </li>
-          </ul>
+          <ngx-sortable
+            [items]="translator.langs"
+            [showHeader]="false"
+            (listSorted)="onLangsSorted(translator.name, $event)"
+          >
+            <ng-template let-item>
+              <div class="flex">
+                <span class="lang-name">{{ item.name }}</span>
+                <input
+                  class="flex-right"
+                  [name]="item.name"
+                  type="checkbox"
+                  [checked]="item.selected"
+                  [title]="item.name"
+                  (click)="onToggle(translator.name, item.name)"
+                />
+              </div>
+            </ng-template>
+          </ngx-sortable>
         </ng-container>
       </div>
     </div>

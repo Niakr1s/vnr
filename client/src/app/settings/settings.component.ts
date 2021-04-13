@@ -1,4 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { plainToClass } from 'class-transformer';
+import { Lang } from '../services/models/lang';
 import { SettingsService } from '../services/settings.service';
 import { TranslationSettings } from '../services/translation-settings/translation-settings';
 import { TranslationSettingsService } from '../services/translation-settings/translation-settings.service';
@@ -38,5 +40,10 @@ export class SettingsComponent implements OnInit {
 
   onToggle(translatorName: string, langName: string): void {
     this.translationSettingsService.toggleLanguage(translatorName, langName);
+  }
+
+  onLangsSorted(translatorName: string, langs: Lang[]): void {
+    langs = plainToClass(Lang, langs);
+    this.translationSettingsService.setLangs(translatorName, langs);
   }
 }

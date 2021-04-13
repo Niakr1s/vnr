@@ -88,4 +88,15 @@ export class TranslationSettingsService {
       console.error(`couldn't get known translators`, e);
     }
   }
+
+  setLangs(translatorName: string, langs: Lang[]): void {
+    const translator = this._translationSettings?.findTranslator(
+      translatorName
+    );
+    if (!translator) {
+      return;
+    }
+    translator.langs = langs;
+    this.translationSettingsSubject.next(this._translationSettings);
+  }
 }
