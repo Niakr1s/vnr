@@ -14,6 +14,16 @@ export class Sentence {
     return s;
   }
 
+  getTranslation(
+    translatorName: string,
+    langName: string
+  ): Translation | undefined {
+    if (!(translatorName in this.translations)) {
+      return;
+    }
+    return this.translations[translatorName][langName];
+  }
+
   setTranslation(translator: string, translation: Translation): void {
     this.translations[translator] ||= {};
     this.translations[translator][translation.to] = translation;

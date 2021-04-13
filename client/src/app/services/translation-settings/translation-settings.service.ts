@@ -1,45 +1,45 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Lang } from './models/lang';
-import { Translator, Translators } from './models/translators';
+import { Lang } from '../models/lang';
+import { TranslationSettings, Translator } from './translation-settings';
 
 @Injectable({
   providedIn: 'root',
 })
-export class TranslatorsRepoService {
-  private _translators?: Translators;
+export class TranslationSettingsService {
+  private _translationSettings?: TranslationSettings;
 
-  private translatorsSubject = new BehaviorSubject<Translators | undefined>(
-    undefined
-  );
+  private translationSettingsSubject = new BehaviorSubject<
+    TranslationSettings | undefined
+  >(undefined);
 
-  get translators$(): Observable<Translators | undefined> {
-    return this.translatorsSubject.asObservable();
+  get translationSettings$(): Observable<TranslationSettings | undefined> {
+    return this.translationSettingsSubject.asObservable();
   }
 
   constructor(private http: HttpClient) {
-    this.getKnownTranslators();
-    this.translators$.subscribe({
+    this.getTranslationSettings();
+    this.translationSettings$.subscribe({
       next: (t) => {
-        this._translators = t;
+        this._translationSettings = t;
         t?.save();
       },
     });
   }
 
   toggleLanguage(translatorName: string, langName: string): void {
-    const lang = this._translators
+    const lang = this._translationSettings
       ?.findTranslator(translatorName)
       ?.findLang(langName);
     if (!lang) {
       return;
     }
     lang.selected = !lang.selected;
-    this.translatorsSubject.next(this._translators);
+    this.translationSettingsSubject.next(this._translationSettings);
   }
 
-  private async getKnownTranslators(): Promise<void> {
+  private async getTranslationSettings(): Promise<void> {
     try {
       const translatorNames = await this.http
         .get<string[]>(`api/knownTranslators`)
@@ -58,10 +58,10 @@ export class TranslatorsRepoService {
           return translator;
         })
       );
-      const translators = Translators.create(translatorList);
-      console.log('got translators', translators);
-      translators.load();
-      this.translatorsSubject.next(translators);
+      const translationSettings = TranslationSettings.create(translatorList);
+      translationSettings.load();
+      console.log('got translationSettings', translationSettings);
+      this.translationSettingsSubject.next(translationSettings);
     } catch (e) {
       console.error(`couldn't get known translators`, e);
     }

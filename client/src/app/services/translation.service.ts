@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Sentence } from './models/sentence';
 import { Translation } from './models/translation';
-import { Translators } from './models/translators';
-import { TranslatorsRepoService } from './translators-repo.service';
+import { TranslationSettings } from './translation-settings/translation-settings';
+import { TranslationSettingsService } from './translation-settings/translation-settings.service';
 
 interface TranslationResponse {
   from: string;
@@ -16,14 +16,14 @@ interface TranslationResponse {
   providedIn: 'root',
 })
 export class TranslationService {
-  private _translators?: Translators;
+  private _translationSettings?: TranslationSettings;
 
   constructor(
     private http: HttpClient,
-    private translatorsRepo: TranslatorsRepoService
+    private translationSettingsService: TranslationSettingsService
   ) {
-    this.translatorsRepo.translators$.subscribe({
-      next: (t) => (this._translators = t),
+    this.translationSettingsService.translationSettings$.subscribe({
+      next: (t) => (this._translationSettings = t),
     });
   }
 
@@ -32,10 +32,10 @@ export class TranslationService {
     sentence: Sentence,
     to: string
   ): Promise<Translation> {
-    if (!this._translators) {
-      throw new Error('no translators');
+    if (!this._translationSettings) {
+      throw new Error('no translation settings');
     }
-    const translator = this._translators.findTranslator(translatorName);
+    const translator = this._translationSettings.findTranslator(translatorName);
     if (!translator) {
       throw new Error(`no translator with name ${translatorName}`);
     }
@@ -49,9 +49,9 @@ export class TranslationService {
           `api/translate/${translator.name}?sentence=${sentence.sentence}&to=${lang.name}`
         )
         .toPromise();
-      return Translation.create(to, res.translation);
+      return Translation.create(translatorName, to, res.translation);
     } catch (e) {
-      return Translation.createError(to, e.message);
+      return Translation.createError(translatorName, to, e.message);
     }
   }
 }

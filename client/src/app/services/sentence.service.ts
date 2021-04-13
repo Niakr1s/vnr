@@ -3,9 +3,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { ClipboardService } from './clipboard.service';
 import { Sentence } from './models/sentence';
 import { Translation } from './models/translation';
-import { Translator } from './models/translators';
+import { TranslationSettings } from './translation-settings/translation-settings';
+import { TranslationSettingsService } from './translation-settings/translation-settings.service';
 import { TranslationService } from './translation.service';
-import { TranslatorsRepoService } from './translators-repo.service';
 
 @Injectable({
   providedIn: 'root',
@@ -57,22 +57,26 @@ export class SentenceService {
     return this.currentSencenceSubject.asObservable();
   }
 
-  private currentTranslator?: Translator;
+  private translationSettings?: TranslationSettings;
 
   constructor(
     clipboardService: ClipboardService,
     private translationService: TranslationService,
-    private translatorRepo: TranslatorsRepoService
+    private translationSettingsService: TranslationSettingsService
   ) {
-    this.translatorRepo.translators$.subscribe({
-      next: (translators) => {
-        this.currentTranslator = translators?.getSelectedTranslator();
-        this.translateMissedLanguages();
+    this.translationSettingsService.translationSettings$.subscribe({
+      next: (translationSettings) => {
+        this.translationSettings = translationSettings;
+        if (this.currentSentence) {
+          this.translateMissedLanguages(this.currentSentence);
+        }
       },
     });
     this.currentSentence$.subscribe({
-      next: () => {
-        this.translateMissedLanguages();
+      next: (s) => {
+        if (s) {
+          this.translateMissedLanguages(s);
+        }
       },
     });
     clipboardService.clipboard.subscribe({
@@ -117,47 +121,33 @@ export class SentenceService {
     this.totalSentencesSubject.next(this.sentences.length);
   }
 
-  private translateMissedLanguages(): void {
-    if (!this.currentTranslator || !this.currentSentence) {
-      return;
-    }
-    const { langs, name } = this.currentTranslator;
-
-    const tos: string[] = [];
-    for (const lang of langs) {
-      if (
-        lang.selected &&
-        !this.currentSentence.hasTranslation(name, lang.name)
-      ) {
-        tos.push(lang.name);
-      }
-    }
-    this.translate(name, this.currentSentence, tos);
-  }
-
-  private translate(
-    translator: string,
-    sentence: Sentence,
-    tos: string[]
-  ): void {
-    tos.forEach((to) => {
-      {
-        this.setTranslation(
-          translator,
-          sentence.id,
-          Translation.createPending(to)
-        );
-        this.translationService
-          .translate(translator, sentence, to)
-          .then((translation) => {
-            this.setTranslation(translator, sentence.id, translation);
-          });
+  private translateMissedLanguages(sentence: Sentence): void {
+    this.translationSettings?.forEachLang((name, lang) => {
+      if (lang.selected && !sentence.hasTranslation(name, lang.name)) {
+        this.translate(name, sentence, lang.name);
       }
     });
   }
 
+  private translate(
+    translatorName: string,
+    sentence: Sentence,
+    to: string
+  ): void {
+    this.setTranslation(
+      translatorName,
+      sentence.id,
+      Translation.createPending(translatorName, to)
+    );
+    this.translationService
+      .translate(translatorName, sentence, to)
+      .then((translation) => {
+        this.setTranslation(translatorName, sentence.id, translation);
+      });
+  }
+
   private setTranslation(
-    translator: string,
+    translatorName: string,
     id: number,
     translation: Translation
   ): void {
@@ -166,7 +156,7 @@ export class SentenceService {
       return;
     }
 
-    sentence.setTranslation(translator, translation);
+    sentence.setTranslation(translatorName, translation);
 
     if (this.isCurrent(sentence)) {
       this.currentSencenceSubject.next(sentence);

@@ -2,9 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Sentence } from '../services/models/sentence';
 import { Translation } from '../services/models/translation';
-import { Translator } from '../services/models/translators';
 import { SentenceService } from '../services/sentence.service';
-import { TranslatorsRepoService } from '../services/translators-repo.service';
+import { TranslationSettings } from '../services/translation-settings/translation-settings';
+import { TranslationSettingsService } from '../services/translation-settings/translation-settings.service';
 
 @Component({
   selector: 'app-translation',
@@ -13,13 +13,13 @@ import { TranslatorsRepoService } from '../services/translators-repo.service';
 })
 export class TranslationComponent implements OnInit, OnDestroy {
   sentence!: Sentence | null;
-  translator?: Translator;
+  translationSettings?: TranslationSettings;
 
   private subs: Subscription[] = [];
 
   constructor(
     private sentenceService: SentenceService,
-    private translatorsRepo: TranslatorsRepoService // private languageService: LanguageService
+    private translationSettingsService: TranslationSettingsService
   ) {}
 
   ngOnInit(): void {
@@ -32,23 +32,28 @@ export class TranslationComponent implements OnInit, OnDestroy {
       })
     );
     this.subs.push(
-      this.translatorsRepo.translators$.subscribe({
+      this.translationSettingsService.translationSettings$.subscribe({
         next: (t) => {
-          this.translator = t?.getSelectedTranslator();
+          this.translationSettings = t;
         },
       })
     );
   }
 
-  getTranslation(lang: string): Translation | undefined {
-    if (!this.translator) {
-      return;
-    }
-    const translations = this.sentence?.translations[this.translator.name];
-    if (!translations) {
-      return;
-    }
-    return translations[lang];
+  getTranslations(): Translation[] {
+    const res: Translation[] = [];
+
+    this.translationSettings?.forEachLang((name, lang) => {
+      if (!lang.selected) {
+        return;
+      }
+      const translation = this.sentence?.getTranslation(name, lang.name);
+      if (translation) {
+        res.push(translation);
+      }
+    });
+
+    return res;
   }
 
   ngOnDestroy(): void {

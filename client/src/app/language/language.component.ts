@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Translator } from '../services/models/translators';
-import { TranslatorsRepoService } from '../services/translators-repo.service';
+import { TranslationSettings } from '../services/translation-settings/translation-settings';
+import { TranslationSettingsService } from '../services/translation-settings/translation-settings.service';
 
 @Component({
   selector: 'app-language',
@@ -9,17 +9,17 @@ import { TranslatorsRepoService } from '../services/translators-repo.service';
   styleUrls: ['./language.component.css'],
 })
 export class LanguageComponent implements OnInit, OnDestroy {
-  translator?: Translator;
+  translationSettings?: TranslationSettings;
 
   subs: Subscription[] = [];
 
-  constructor(private translatorsRepo: TranslatorsRepoService) {}
+  constructor(private translationSettingsService: TranslationSettingsService) {}
 
   ngOnInit(): void {
     this.subs.push(
-      this.translatorsRepo.translators$.subscribe({
+      this.translationSettingsService.translationSettings$.subscribe({
         next: (t) => {
-          this.translator = t?.getSelectedTranslator();
+          this.translationSettings = t;
         },
       })
     );
@@ -29,10 +29,7 @@ export class LanguageComponent implements OnInit, OnDestroy {
     this.subs.forEach((s) => s.unsubscribe());
   }
 
-  onToggle(lang: string): void {
-    if (!this.translator) {
-      return;
-    }
-    this.translatorsRepo.toggleLanguage(this.translator.name, lang);
+  onToggle(translatorName: string, lang: string): void {
+    this.translationSettingsService.toggleLanguage(translatorName, lang);
   }
 }
