@@ -7,6 +7,7 @@ import (
 
 var KnownTranslators = []string{
 	"deepl",
+	"google",
 }
 
 type TranslationOptions struct {
@@ -64,6 +65,8 @@ func GetTranslator(name string, options GetTranslatorOptions) (Translator, error
 		return NewDeeplTranslator(options.Chrome), nil
 	case "yandex":
 		return NewYandexTranslator(options.Chrome), nil
+	case "google":
+		return NewGoogleTranslator(), nil
 	default:
 		return nil, fmt.Errorf("invalid translator: got: %s, expected: one of %s", name, KnownTranslators)
 	}
