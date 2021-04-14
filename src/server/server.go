@@ -8,16 +8,21 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"vnr/src/translators"
+	"vnr/src/translator"
 )
 
 //go:embed static
 var staticFiles embed.FS
 
+type Translator interface {
+	GetTranslation(translationOptions translator.TranslationOptions) (translator.TranslationResult, error)
+	GetLanguages() (translator.Langs, error)
+}
+
 type ServerOptions struct {
 	Port string
 
-	Translators map[string]translators.Translator
+	Translators map[string]Translator
 }
 
 func StartServer(options ServerOptions) {
@@ -46,7 +51,7 @@ func StartServer(options ServerOptions) {
 	}
 }
 
-func getTranslatorNames(m map[string]translators.Translator) []string {
+func getTranslatorNames(m map[string]Translator) []string {
 	res := make([]string, 0)
 	for k := range m {
 		res = append(res, k)
@@ -65,7 +70,7 @@ func knownTranslationsHandler(translatorNames []string) http.HandlerFunc {
 	}
 }
 
-func langsHandler(translator translators.Translator) http.HandlerFunc {
+func langsHandler(translator Translator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		langs, err := translator.GetLanguages()
 		if err != nil {
@@ -76,7 +81,7 @@ func langsHandler(translator translators.Translator) http.HandlerFunc {
 	}
 }
 
-func translationHandler(translator translators.Translator) http.HandlerFunc {
+func translationHandler(translator Translator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		translationOptions := translationOptionsFromQuery(r.URL.Query())
 		log.Printf("translate start: %+v", translationOptions)
@@ -107,12 +112,12 @@ func writeJson(obj interface{}, w http.ResponseWriter) {
 	w.Write(translationResultJson)
 }
 
-func translationOptionsFromQuery(query url.Values) translators.TranslationOptions {
+func translationOptionsFromQuery(query url.Values) translator.TranslationOptions {
 	sentence := query.Get("sentence")
 	from := query.Get("from")
 	to := query.Get("to")
 
-	translationOptions := translators.NewTranslationOptions(sentence)
+	translationOptions := translator.NewTranslationOptions(sentence)
 	if from != "" {
 		translationOptions.From = from
 	}

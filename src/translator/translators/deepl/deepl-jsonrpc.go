@@ -1,3 +1,5 @@
+package deepl
+
 /*
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
@@ -7,8 +9,6 @@
  of this license document, but changing it is not allowed.
 */
 
-package translators
-
 import (
 	"fmt"
 	"math/rand"
@@ -16,11 +16,12 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"vnr/src/translator"
 )
 
 // getDeeplTranslationRpcRequest makes request.
 // This part of code partly was copied from https://github.com/Artikash/Textractor/blob/master/extensions/deepltranslate.cpp
-func getDeeplTranslationRpcRequest(translationOptions TranslationOptions) (*http.Request, error) {
+func getDeeplTranslationRpcRequest(translationOptions translator.TranslationOptions) (*http.Request, error) {
 	r := time.Now().Unix()
 	n := strings.Count(translationOptions.Sentence, "i") + 1
 	id := 10000*rand.Intn(9999) + 1

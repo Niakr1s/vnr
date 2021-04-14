@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 	"time"
-	"vnr/src/server/chrome"
+	"vnr/src/chrome"
 
 	"github.com/chromedp/chromedp"
 	"github.com/stretchr/testify/assert"

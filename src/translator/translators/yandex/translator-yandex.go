@@ -1,4 +1,4 @@
-package translators
+package yandex
 
 import (
 	"fmt"
@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"vnr/src/server/chrome"
+	"vnr/src/chrome"
+	"vnr/src/translator"
 
 	"github.com/chromedp/chromedp"
 )
@@ -16,7 +17,7 @@ import (
 type YandexTranslator struct {
 	chrome *chrome.Chrome
 
-	langsCache Langs
+	langsCache translator.Langs
 }
 
 func NewYandexTranslator(chrome *chrome.Chrome) *YandexTranslator {
@@ -25,8 +26,8 @@ func NewYandexTranslator(chrome *chrome.Chrome) *YandexTranslator {
 	}
 }
 
-func (dt *YandexTranslator) GetTranslation(translationOptions TranslationOptions) (TranslationResult, error) {
-	translationResult := TranslationResult{TranslationOptions: translationOptions}
+func (dt *YandexTranslator) GetTranslation(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
+	translationResult := translator.TranslationResult{TranslationOptions: translationOptions}
 
 	url := dt.translationOptionsToUrl(translationOptions)
 
@@ -37,18 +38,18 @@ func (dt *YandexTranslator) GetTranslation(translationOptions TranslationOptions
 	}
 	err := dt.chrome.Run(actions...)
 	if err != nil {
-		return TranslationResult{}, err
+		return translator.TranslationResult{}, err
 	}
 
 	translationResult.Translation = strings.TrimSpace(translationResult.Translation)
 	return translationResult, nil
 }
 
-func (dt *YandexTranslator) translationOptionsToUrl(translationOptions TranslationOptions) string {
+func (dt *YandexTranslator) translationOptionsToUrl(translationOptions translator.TranslationOptions) string {
 	return fmt.Sprintf("https://translate.yandex.com/?lang=%s-%s&text=%s", translationOptions.From, translationOptions.To, translationOptions.Sentence)
 }
 
-func (dt *YandexTranslator) GetLanguages() (Langs, error) {
+func (dt *YandexTranslator) GetLanguages() (translator.Langs, error) {
 	if dt.langsCache != nil {
 		return dt.langsCache, nil
 	}
@@ -68,7 +69,7 @@ func (dt *YandexTranslator) GetLanguages() (Langs, error) {
 	return res, nil
 }
 
-func getLanguagesFromYandexBody(r io.Reader) (Langs, error) {
+func getLanguagesFromYandexBody(r io.Reader) (translator.Langs, error) {
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -92,19 +93,19 @@ func getLanguagesFromYandexBody(r io.Reader) (Langs, error) {
 }
 
 // parseYandexLangString parses str of kind  ""az":"Азербайджанский","sq":"Албанский",..." to Langs
-func parseYandexLangString(str string) (Langs, error) {
+func parseYandexLangString(str string) (translator.Langs, error) {
 	re := regexp.MustCompile(`"(.*)":"(.*)"`)
 
 	str = strings.TrimSpace(str)
 	splitted := strings.Split(str, ",")
 
-	res := Langs{}
+	res := translator.Langs{}
 	for _, langStr := range splitted {
 		match := re.FindAllStringSubmatch(langStr, -1)
 		if len(match) == 0 || len(match[0]) != 3 {
 			return nil, fmt.Errorf("couldn't parse string %s", langStr)
 		}
-		lang := Lang{Name: match[0][1], Description: match[0][2]}
+		lang := translator.Lang{Name: match[0][1], Description: match[0][2]}
 		res = append(res, lang)
 	}
 	return res, nil

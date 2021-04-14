@@ -8,9 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"vnr/src/chrome"
 	"vnr/src/server"
-	"vnr/src/server/chrome"
-	"vnr/src/translators"
+	"vnr/src/translator/translators/deepl"
+	"vnr/src/translator/translators/google"
 )
 
 func main() {
@@ -39,16 +40,12 @@ func main() {
 		c = chromeInstance
 	}
 
-	transl, err := translators.GetAllKnownTranslators(translators.GetTranslatorOptions{
-		Chrome: c,
-	})
-	if err != nil {
-		log.Fatalf("couldn't get translators: %v", err)
-	}
-
 	server.StartServer(server.ServerOptions{
-		Port:        env("PORT", ":5322"),
-		Translators: transl,
+		Port: env("PORT", ":5322"),
+		Translators: map[string]server.Translator{
+			"deepl":  deepl.NewDeeplTranslator(c),
+			"google": google.NewGoogleTranslator(),
+		},
 	})
 }
 

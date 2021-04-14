@@ -1,14 +1,16 @@
-package translators
+package yandex
 
 import (
 	"strings"
 	"testing"
+	"vnr/src/chrome"
+	"vnr/src/translator"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestYandexTranslator(t *testing.T) {
-	yandex := NewDeeplTranslator(makeChromeInstance(t))
+	yandex := NewYandexTranslator(chrome.MakeChromeInstance(t))
 
 	t.Run("GetLanguages", func(t *testing.T) {
 		langs, err := yandex.GetLanguages()
@@ -17,7 +19,7 @@ func TestYandexTranslator(t *testing.T) {
 	})
 
 	t.Run("GetTranslation", func(t *testing.T) {
-		translationOptions := TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
+		translationOptions := translator.TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
 		res, err := yandex.GetTranslation(translationOptions)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
@@ -33,5 +35,10 @@ TRANSLATOR_LANGS: {"af":"Afrikaans","sq":"Albanian","am":"Amharic","ar":"Arabic"
 	langs, err := getLanguagesFromYandexBody(bodyReader)
 
 	assert.NoError(t, err)
-	assert.Equal(t, Langs{Lang{"af", "Afrikaans"}, Lang{"sq", "Albanian"}, Lang{"am", "Amharic"}, Lang{"ar", "Arabic"}}, langs)
+	assert.Equal(t, translator.Langs{
+		translator.Lang{Name: "af", Description: "Afrikaans"},
+		translator.Lang{Name: "sq", Description: "Albanian"},
+		translator.Lang{Name: "am", Description: "Amharic"},
+		translator.Lang{Name: "ar", Description: "Arabic"},
+	}, langs)
 }

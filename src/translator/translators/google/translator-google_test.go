@@ -1,8 +1,9 @@
-package translators
+package google
 
 import (
 	"strings"
 	"testing"
+	"vnr/src/translator"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +18,7 @@ func TestGoogleTranslator(t *testing.T) {
 	})
 
 	t.Run("GetTranslation", func(t *testing.T) {
-		translationOptions := TranslationOptions{From: "ja", To: "ru", Sentence: "こんにちは世界"}
+		translationOptions := translator.TranslationOptions{From: "ja", To: "ru", Sentence: "こんにちは世界"}
 		res, err := google.GetTranslation(translationOptions)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
@@ -63,5 +64,10 @@ func Test_getLanguagesFromGoogleBody(t *testing.T) {
 	langs, err := getLanguagesFromGoogleBody(bodyReader)
 
 	assert.NoError(t, err)
-	assert.Equal(t, Langs{Lang{"af", "Afrikaans"}, Lang{"sq", "Albanian"}, Lang{"zh-CN", "Chinese (Simplified)"}, Lang{"zh-TW", "Chinese (Traditional)"}}, langs)
+	assert.Equal(t, translator.Langs{
+		translator.Lang{Name: "af", Description: "Afrikaans"},
+		translator.Lang{Name: "sq", Description: "Albanian"},
+		translator.Lang{Name: "zh-CN", Description: "Chinese (Simplified)"},
+		translator.Lang{Name: "zh-TW", Description: "Chinese (Traditional)"},
+	}, langs)
 }

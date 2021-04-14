@@ -1,4 +1,4 @@
-package translators
+package google
 
 import (
 	"bytes"
@@ -8,18 +8,19 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"vnr/src/translator"
 )
 
 type GoogleTranslator struct {
-	langsCache Langs
+	langsCache translator.Langs
 }
 
 func NewGoogleTranslator() *GoogleTranslator {
 	return &GoogleTranslator{}
 }
 
-func (dt *GoogleTranslator) GetTranslation(translationOptions TranslationOptions) (TranslationResult, error) {
-	translationResult := TranslationResult{TranslationOptions: translationOptions}
+func (dt *GoogleTranslator) GetTranslation(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
+	translationResult := translator.TranslationResult{TranslationOptions: translationOptions}
 
 	rawUrl := dt.translationOptionsToUrl(translationOptions)
 
@@ -38,7 +39,7 @@ func (dt *GoogleTranslator) GetTranslation(translationOptions TranslationOptions
 	return translationResult, nil
 }
 
-func (dt *GoogleTranslator) translationOptionsToUrl(translationOptions TranslationOptions) string {
+func (dt *GoogleTranslator) translationOptionsToUrl(translationOptions translator.TranslationOptions) string {
 	q := url.Values{}
 	q.Add("sl", translationOptions.From)
 	q.Add("tl", translationOptions.To)
@@ -46,7 +47,7 @@ func (dt *GoogleTranslator) translationOptionsToUrl(translationOptions Translati
 	return "https://translate.google.com/m?" + q.Encode()
 }
 
-func (dt *GoogleTranslator) GetLanguages() (Langs, error) {
+func (dt *GoogleTranslator) GetLanguages() (translator.Langs, error) {
 	if dt.langsCache != nil {
 		return dt.langsCache, nil
 	}
@@ -83,7 +84,7 @@ func getTranslationFromGoogleBody(r io.Reader) (string, error) {
 	return string(res), nil
 }
 
-func getLanguagesFromGoogleBody(r io.Reader) (Langs, error) {
+func getLanguagesFromGoogleBody(r io.Reader) (translator.Langs, error) {
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -96,10 +97,10 @@ func getLanguagesFromGoogleBody(r io.Reader) (Langs, error) {
 	re := regexp.MustCompile(`(?U)<a.*tl=(.*)&.*>(.*)</a>`)
 	matches := re.FindAllSubmatch(body, -1)
 
-	res := Langs{}
+	res := translator.Langs{}
 
 	for _, match := range matches {
-		lang := Lang{Name: string(match[1]), Description: string(match[2])}
+		lang := translator.Lang{Name: string(match[1]), Description: string(match[2])}
 		res = append(res, lang)
 	}
 

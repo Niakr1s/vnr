@@ -1,4 +1,4 @@
-package translators
+package deepl
 
 import (
 	"encoding/json"
@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"vnr/src/server/chrome"
+	"vnr/src/chrome"
+	"vnr/src/translator"
 
 	"github.com/chromedp/chromedp"
 )
@@ -16,7 +17,7 @@ import (
 type DeeplTranslator struct {
 	chrome *chrome.Chrome
 
-	langsCache Langs
+	langsCache translator.Langs
 }
 
 func NewDeeplTranslator(chrome *chrome.Chrome) *DeeplTranslator {
@@ -25,15 +26,15 @@ func NewDeeplTranslator(chrome *chrome.Chrome) *DeeplTranslator {
 	}
 }
 
-func (dt *DeeplTranslator) GetTranslation(translationOptions TranslationOptions) (TranslationResult, error) {
+func (dt *DeeplTranslator) GetTranslation(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
 	if dt.chrome == nil {
 		return dt.getTranslationWithoutChrome(translationOptions)
 	}
 	return dt.getTranslationWithChrome(translationOptions)
 }
 
-func (dt *DeeplTranslator) getTranslationWithChrome(translationOptions TranslationOptions) (TranslationResult, error) {
-	translationResult := TranslationResult{TranslationOptions: translationOptions}
+func (dt *DeeplTranslator) getTranslationWithChrome(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
+	translationResult := translator.TranslationResult{TranslationOptions: translationOptions}
 
 	url := dt.translationOptionsToUrl(translationOptions)
 
@@ -44,15 +45,15 @@ func (dt *DeeplTranslator) getTranslationWithChrome(translationOptions Translati
 	}
 	err := dt.chrome.Run(actions...)
 	if err != nil {
-		return TranslationResult{}, err
+		return translator.TranslationResult{}, err
 	}
 
 	translationResult.Translation = strings.TrimSpace(translationResult.Translation)
 	return translationResult, nil
 }
 
-func (dt *DeeplTranslator) getTranslationWithoutChrome(translationOptions TranslationOptions) (TranslationResult, error) {
-	translationResult := TranslationResult{TranslationOptions: translationOptions}
+func (dt *DeeplTranslator) getTranslationWithoutChrome(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
+	translationResult := translator.TranslationResult{TranslationOptions: translationOptions}
 
 	req, err := getDeeplTranslationRpcRequest(translationOptions)
 	if err != nil {
@@ -104,11 +105,11 @@ func getTranslationFromDeeplJsonRpcBody(r io.Reader) (string, error) {
 	return rpc.Result.Translations[0].Beams[0].PostprocessedSentence, nil
 }
 
-func (dt *DeeplTranslator) translationOptionsToUrl(translationOptions TranslationOptions) string {
+func (dt *DeeplTranslator) translationOptionsToUrl(translationOptions translator.TranslationOptions) string {
 	return fmt.Sprintf("https://www.deepl.com/translator#%s/%s/%s", translationOptions.From, translationOptions.To, translationOptions.Sentence)
 }
 
-func (dt *DeeplTranslator) GetLanguages() (Langs, error) {
+func (dt *DeeplTranslator) GetLanguages() (translator.Langs, error) {
 	if dt.langsCache != nil {
 		return dt.langsCache, nil
 	}
@@ -128,7 +129,7 @@ func (dt *DeeplTranslator) GetLanguages() (Langs, error) {
 	return res, nil
 }
 
-func getLanguagesFromDeeplBody(r io.Reader) (Langs, error) {
+func getLanguagesFromDeeplBody(r io.Reader) (translator.Langs, error) {
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -138,10 +139,10 @@ func getLanguagesFromDeeplBody(r io.Reader) (Langs, error) {
 	matches := re.FindAllSubmatch(body, -1)
 	_ = matches
 
-	res := Langs{}
+	res := translator.Langs{}
 
 	for _, match := range matches {
-		lang := Lang{Name: string(match[1]), Description: string(match[2])}
+		lang := translator.Lang{Name: string(match[1]), Description: string(match[2])}
 		// both English (American) and English (British) have same alias
 		if strings.HasPrefix(lang.Description, "English") {
 			lang.Description = "English"

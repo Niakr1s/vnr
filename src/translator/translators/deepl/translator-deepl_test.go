@@ -1,14 +1,16 @@
-package translators
+package deepl
 
 import (
 	"strings"
 	"testing"
+	"vnr/src/chrome"
+	"vnr/src/translator"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDeeplTranslator(t *testing.T) {
-	deepl := NewDeeplTranslator(makeChromeInstance(t))
+	deepl := NewDeeplTranslator(chrome.MakeChromeInstance(t))
 
 	t.Run("GetLanguages", func(t *testing.T) {
 		langs, err := deepl.GetLanguages()
@@ -17,7 +19,7 @@ func TestDeeplTranslator(t *testing.T) {
 	})
 
 	t.Run("GetTranslation", func(t *testing.T) {
-		translationOptions := TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
+		translationOptions := translator.TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
 		res, err := deepl.GetTranslation(translationOptions)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
@@ -26,7 +28,7 @@ func TestDeeplTranslator(t *testing.T) {
 
 func Test_DeeplGetTranslationWithoutChrome(t *testing.T) {
 	deepl := NewDeeplTranslator(nil)
-	translationOptions := TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
+	translationOptions := translator.TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
 	res, err := deepl.GetTranslation(translationOptions)
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
@@ -45,7 +47,11 @@ func Test_getLanguagesFromDeeplBody(t *testing.T) {
 	langs, err := getLanguagesFromDeeplBody(bodyReader)
 
 	assert.NoError(t, err)
-	assert.Equal(t, Langs{Lang{"en", "English"}, Lang{"de", "German"}, Lang{"fr", "French"}}, langs)
+	assert.Equal(t, translator.Langs{
+		translator.Lang{Name: "en", Description: "English"},
+		translator.Lang{Name: "de", Description: "German"},
+		translator.Lang{Name: "fr", Description: "French"},
+	}, langs)
 }
 
 func Test_getTranslationFromDeeplJsonRpcBody(t *testing.T) {
