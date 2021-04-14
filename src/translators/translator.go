@@ -28,9 +28,30 @@ type TranslationResult struct {
 	Translation string `json:"translation"`
 }
 
+type Lang struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type Langs []Lang
+
+func (l Langs) RemoveDuplicates() Langs {
+	set := map[string]Lang{}
+
+	res := Langs{}
+	for _, lang := range l {
+		if _, ok := set[lang.Name]; ok {
+			continue
+		}
+		set[lang.Name] = lang
+		res = append(res, lang)
+	}
+	return res
+}
+
 type Translator interface {
 	GetTranslation(translationOptions TranslationOptions) (TranslationResult, error)
-	GetLanguages() ([]string, error)
+	GetLanguages() (Langs, error)
 }
 
 type GetTranslatorOptions struct {

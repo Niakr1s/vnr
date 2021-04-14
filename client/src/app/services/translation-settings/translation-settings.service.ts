@@ -4,6 +4,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Lang } from '../models/lang';
 import { TranslationSettings, Translator } from './translation-settings';
 
+interface LangDto {
+  name: string;
+  description: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -70,12 +75,12 @@ export class TranslationSettingsService {
 
       const translatorList = await Promise.all(
         translatorNames.map(async (name) => {
-          const langs: string[] = await this.http
-            .get<string[]>(`api/langs/${name}`)
+          const langs = await this.http
+            .get<LangDto[]>(`api/langs/${name}`)
             .toPromise();
           const translator = Translator.create(
             name,
-            langs.map((n) => Lang.create(n))
+            langs.map((n) => Lang.create(n.name, n.description))
           );
           return translator;
         })

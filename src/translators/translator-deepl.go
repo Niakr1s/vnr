@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 	"vnr/src/server/chrome"
-	"vnr/src/util"
 
 	"github.com/chromedp/chromedp"
 )
@@ -16,7 +15,7 @@ import (
 type DeeplTranslator struct {
 	chrome *chrome.Chrome
 
-	langsCache []string
+	langsCache Langs
 }
 
 func NewDeeplTranslator(chrome *chrome.Chrome) *DeeplTranslator {
@@ -48,7 +47,7 @@ func (dt *DeeplTranslator) translationOptionsToUrl(translationOptions Translatio
 	return fmt.Sprintf("https://www.deepl.com/translator#%s/%s/%s", translationOptions.From, translationOptions.To, translationOptions.Sentence)
 }
 
-func (dt *DeeplTranslator) GetLanguages() ([]string, error) {
+func (dt *DeeplTranslator) GetLanguages() (Langs, error) {
 	if dt.langsCache != nil {
 		return dt.langsCache, nil
 	}
@@ -68,23 +67,28 @@ func (dt *DeeplTranslator) GetLanguages() ([]string, error) {
 	return res, nil
 }
 
-func getLanguagesFromDeeplBody(r io.Reader) ([]string, error) {
+func getLanguagesFromDeeplBody(r io.Reader) (Langs, error) {
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
-	re := regexp.MustCompile(`dl-lang='([a-z]{2})`)
+	re := regexp.MustCompile(`dl-lang='([a-z]{2}).*>(.*)</button`)
 	matches := re.FindAllSubmatch(body, -1)
 	_ = matches
 
-	res := []string{}
+	res := Langs{}
 
 	for _, match := range matches {
-		res = append(res, string(match[1]))
+		lang := Lang{Name: string(match[1]), Description: string(match[2])}
+		// both English (American) and English (British) have same alias
+		if strings.HasPrefix(lang.Description, "English") {
+			lang.Description = "English"
+		}
+		res = append(res, lang)
 	}
 
-	res = util.RemoveDuplicates(res)
+	res = res.RemoveDuplicates()
 
 	return res, nil
 }
