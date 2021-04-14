@@ -15,6 +15,13 @@ func TestDeeplTranslator(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotZero(t, len(langs))
 	})
+
+	t.Run("GetTranslation", func(t *testing.T) {
+		translationOptions := TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
+		res, err := deepl.GetTranslation(translationOptions)
+		assert.Nil(t, err)
+		assert.NotNil(t, res)
+	})
 }
 
 func Test_getLanguagesFromDeeplBody(t *testing.T) {
