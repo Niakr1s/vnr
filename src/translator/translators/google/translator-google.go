@@ -3,6 +3,7 @@ package google
 import (
 	"bytes"
 	"fmt"
+	"html"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -79,7 +80,7 @@ func getTranslationFromGoogleBody(r io.Reader) (string, error) {
 	if len(match) == 0 {
 		return "", fmt.Errorf("match not found")
 	}
-	res := match[0][1]
+	res := html.UnescapeString(string(match[0][1]))
 
 	return string(res), nil
 }
