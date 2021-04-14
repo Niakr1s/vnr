@@ -3,31 +3,13 @@ package deepl
 import (
 	"strings"
 	"testing"
-	"vnr/src/chrome"
 	"vnr/src/translator"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDeeplTranslator(t *testing.T) {
-	deepl := NewDeeplTranslator(chrome.MakeChromeInstance(t))
-
-	t.Run("GetLanguages", func(t *testing.T) {
-		langs, err := deepl.GetLanguages()
-		assert.Nil(t, err)
-		assert.NotZero(t, len(langs))
-	})
-
-	t.Run("GetTranslation", func(t *testing.T) {
-		translationOptions := translator.TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
-		res, err := deepl.GetTranslation(translationOptions)
-		assert.Nil(t, err)
-		assert.NotNil(t, res)
-	})
-}
-
 func Test_DeeplGetTranslationWithoutChrome(t *testing.T) {
-	deepl := NewDeeplTranslator(nil)
+	deepl := NewDeeplTranslator()
 	translationOptions := translator.TranslationOptions{From: "en", To: "ru", Sentence: "hello"}
 	res, err := deepl.GetTranslation(translationOptions)
 	assert.Nil(t, err)

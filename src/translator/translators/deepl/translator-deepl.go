@@ -8,48 +8,19 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"vnr/src/chrome"
 	"vnr/src/translator"
-
-	"github.com/chromedp/chromedp"
 )
 
 type DeeplTranslator struct {
-	chrome *chrome.Chrome
-
 	langsCache translator.Langs
 }
 
-func NewDeeplTranslator(chrome *chrome.Chrome) *DeeplTranslator {
-	return &DeeplTranslator{
-		chrome: chrome,
-	}
+func NewDeeplTranslator() *DeeplTranslator {
+	return &DeeplTranslator{}
 }
 
 func (dt *DeeplTranslator) GetTranslation(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
-	if dt.chrome == nil {
-		return dt.getTranslationWithoutChrome(translationOptions)
-	}
-	return dt.getTranslationWithChrome(translationOptions)
-}
-
-func (dt *DeeplTranslator) getTranslationWithChrome(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
-	translationResult := translator.TranslationResult{TranslationOptions: translationOptions}
-
-	url := dt.translationOptionsToUrl(translationOptions)
-
-	actions := []chromedp.Action{
-		chromedp.Navigate(url),
-		chromedp.WaitVisible("lmt__rating-up"),
-		chromedp.TextContent("#target-dummydiv", &translationResult.Translation),
-	}
-	err := dt.chrome.Run(actions...)
-	if err != nil {
-		return translator.TranslationResult{}, err
-	}
-
-	translationResult.Translation = strings.TrimSpace(translationResult.Translation)
-	return translationResult, nil
+	return dt.getTranslationWithoutChrome(translationOptions)
 }
 
 func (dt *DeeplTranslator) getTranslationWithoutChrome(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
@@ -103,10 +74,6 @@ func getTranslationFromDeeplJsonRpcBody(r io.Reader) (string, error) {
 	}
 
 	return rpc.Result.Translations[0].Beams[0].PostprocessedSentence, nil
-}
-
-func (dt *DeeplTranslator) translationOptionsToUrl(translationOptions translator.TranslationOptions) string {
-	return fmt.Sprintf("https://www.deepl.com/translator#%s/%s/%s", translationOptions.From, translationOptions.To, translationOptions.Sentence)
 }
 
 func (dt *DeeplTranslator) GetLanguages() (translator.Langs, error) {
