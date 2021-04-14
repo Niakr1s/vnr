@@ -21,7 +21,7 @@ import (
 // getDeeplTranslationRpcRequest makes request.
 // This part of code partly was copied from https://github.com/Artikash/Textractor/blob/master/extensions/deepltranslate.cpp
 func getDeeplTranslationRpcRequest(translationOptions translator.TranslationOptions) (*http.Request, error) {
-	r := time.Now().Unix()
+	r := time.Now().UnixNano() / (1000000)
 	n := strings.Count(translationOptions.Sentence, "i") + 1
 	id := 10000*rand.Intn(9999) + 1
 	var timeStamp int64 = r + (int64(n) - r%int64(n))
@@ -57,6 +57,7 @@ func getDeeplTranslationRpcRequest(translationOptions translator.TranslationOpti
 	req.Header.Add("Accept-Language", "en-US,en;q=0.5")
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 	req.Header.Add("Origin", "https://www.deepl.com")
+	req.Header.Add("Referer", "https://www.deepl.com/")
 	req.Header.Add("TE", "Trailers")
 
 	return req, nil
