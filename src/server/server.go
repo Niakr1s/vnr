@@ -39,7 +39,7 @@ func StartServer(options ServerOptions) {
 	http.HandleFunc("/api/knownTranslators", knownTranslationsHandler(getTranslatorNames(options.Translators)))
 
 	for name, translator := range options.Translators {
-		http.HandleFunc(fmt.Sprintf("/api/translate/%s", name), translationHandler(translator))
+		http.HandleFunc(fmt.Sprintf("/api/translate/%s", name), translationHandler(name, translator))
 		http.HandleFunc(fmt.Sprintf("/api/langs/%s", name), langsHandler(translator))
 	}
 
@@ -81,18 +81,18 @@ func langsHandler(translator Translator) http.HandlerFunc {
 	}
 }
 
-func translationHandler(translator Translator) http.HandlerFunc {
+func translationHandler(translatorName string, translator Translator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		translationOptions := translationOptionsFromQuery(r.URL.Query())
-		log.Printf("translate start: %+v", translationOptions)
+		log.Printf("%s: translate start: %+v", translatorName, translationOptions)
 		translationResult, err := translator.GetTranslation(translationOptions)
 		if err != nil {
-			log.Printf("translate failure: %+v", translationOptions)
+			log.Printf("%s: translate failure: %+v, reason: %v", translatorName, translationOptions, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
 		}
-		log.Printf("translate success: %+v", translationResult)
+		log.Printf("%s: translate success: %+v", translatorName, translationResult)
 		translationResultJson, err := json.Marshal(translationResult)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
