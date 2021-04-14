@@ -1,6 +1,7 @@
 package translators
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -25,6 +26,13 @@ func NewDeeplTranslator(chrome *chrome.Chrome) *DeeplTranslator {
 }
 
 func (dt *DeeplTranslator) GetTranslation(translationOptions TranslationOptions) (TranslationResult, error) {
+	if dt.chrome == nil {
+		return dt.getTranslationWithoutChrome(translationOptions)
+	}
+	return dt.getTranslationWithChrome(translationOptions)
+}
+
+func (dt *DeeplTranslator) getTranslationWithChrome(translationOptions TranslationOptions) (TranslationResult, error) {
 	translationResult := TranslationResult{TranslationOptions: translationOptions}
 
 	url := dt.translationOptionsToUrl(translationOptions)
@@ -41,6 +49,59 @@ func (dt *DeeplTranslator) GetTranslation(translationOptions TranslationOptions)
 
 	translationResult.Translation = strings.TrimSpace(translationResult.Translation)
 	return translationResult, nil
+}
+
+func (dt *DeeplTranslator) getTranslationWithoutChrome(translationOptions TranslationOptions) (TranslationResult, error) {
+	translationResult := TranslationResult{TranslationOptions: translationOptions}
+
+	req, err := getDeeplTranslationRpcRequest(translationOptions)
+	if err != nil {
+		return translationResult, err
+	}
+
+	r, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return translationResult, err
+	}
+	defer r.Body.Close()
+	if r.StatusCode == http.StatusTooManyRequests {
+		return translationResult, fmt.Errorf("too many requests")
+	}
+
+	translation, err := getTranslationFromDeeplJsonRpcBody(r.Body)
+	if err != nil {
+		return translationResult, err
+	}
+	translationResult.Translation = translation
+	return translationResult, nil
+}
+
+func getTranslationFromDeeplJsonRpcBody(r io.Reader) (string, error) {
+	body, err := io.ReadAll(r)
+	if err != nil {
+		return "", err
+	}
+
+	type Rpc struct {
+		Result struct {
+			Translations []struct {
+				Beams []struct {
+					PostprocessedSentence string `json:"postprocessed_sentence"`
+				} `json:"beams"`
+			} `json:"translations"`
+		} `json:"result"`
+	}
+
+	rpc := Rpc{}
+	err = json.Unmarshal(body, &rpc)
+	if err != nil {
+		return "", err
+	}
+	if len(rpc.Result.Translations) == 0 || len(rpc.Result.Translations[0].Beams) == 0 {
+		return "", fmt.Errorf("no translations")
+	}
+
+	return rpc.Result.Translations[0].Beams[0].PostprocessedSentence, nil
 }
 
 func (dt *DeeplTranslator) translationOptionsToUrl(translationOptions TranslationOptions) string {

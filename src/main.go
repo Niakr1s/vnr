@@ -15,6 +15,7 @@ import (
 
 func main() {
 	var headlessFlag = flag.Bool("headless", true, "chrome headless mode")
+	var withChrome = flag.Bool("withChrome", true, "should app use chrome")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -25,16 +26,21 @@ func main() {
 	defer cancelAndWait()
 	handleOsInterrupt(cancelAndWait)
 
-	chrome, err := chrome.NewChrome(ctx, chrome.ChromeOptions{
-		Headless: *headlessFlag,
-		Timeout:  time.Second * 15,
-	})
-	if err != nil {
-		log.Fatalf("couldn't initialize chrome: %v", err)
+	var c *chrome.Chrome
+	if *withChrome {
+		log.Println("initializing chrome...")
+		chromeInstance, err := chrome.NewChrome(ctx, chrome.ChromeOptions{
+			Headless: *headlessFlag,
+			Timeout:  time.Second * 15,
+		})
+		if err != nil {
+			log.Fatalf("couldn't initialize chrome: %v", err)
+		}
+		c = chromeInstance
 	}
 
 	transl, err := translators.GetAllKnownTranslators(translators.GetTranslatorOptions{
-		Chrome: chrome,
+		Chrome: c,
 	})
 	if err != nil {
 		log.Fatalf("couldn't get translators: %v", err)
