@@ -62,6 +62,8 @@ func GetTranslator(name string, options GetTranslatorOptions) (Translator, error
 	switch name {
 	case "deepl":
 		return NewDeeplTranslator(options.Chrome), nil
+	case "yandex":
+		return NewYandexTranslator(options.Chrome), nil
 	default:
 		return nil, fmt.Errorf("invalid translator: got: %s, expected: one of %s", name, KnownTranslators)
 	}

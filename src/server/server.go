@@ -79,12 +79,15 @@ func langsHandler(translator translators.Translator) http.HandlerFunc {
 func translationHandler(translator translators.Translator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		translationOptions := translationOptionsFromQuery(r.URL.Query())
+		log.Printf("translate start: %+v", translationOptions)
 		translationResult, err := translator.GetTranslation(translationOptions)
 		if err != nil {
+			log.Printf("translate failure: %+v", translationOptions)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
 		}
+		log.Printf("translate success: %+v", translationResult)
 		translationResultJson, err := json.Marshal(translationResult)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
