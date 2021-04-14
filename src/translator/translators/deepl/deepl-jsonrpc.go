@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 	"vnr/src/translator"
@@ -48,7 +47,7 @@ func getDeeplTranslationRpcRequest(translationOptions translator.TranslationOpti
     },
     "id": %d
 }
-    `, url.QueryEscape(translationOptions.Sentence), strings.ToUpper(translationOptions.From), strings.ToUpper(translationOptions.To), timeStamp, id)
+    `, translationOptions.Sentence, strings.ToUpper(translationOptions.From), strings.ToUpper(translationOptions.To), timeStamp, id)
 
 	req, err := http.NewRequest(http.MethodPost, "https://www2.deepl.com/jsonrpc", strings.NewReader(requestBody))
 	if err != nil {
