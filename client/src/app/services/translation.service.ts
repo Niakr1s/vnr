@@ -46,7 +46,7 @@ export class TranslationService {
     try {
       const res = await this.http
         .get<TranslationResponse>(
-          `api/translate/${translator.name}?sentence=${sentence.sentence}&to=${lang.name}&from=ja`
+          `api/translate/${translator.name}?sentence=${sentence.sentence}&to=${lang.name}`
         )
         .toPromise();
       return Translation.create(translatorName, to, res.translation);
