@@ -11,12 +11,9 @@
   overflow-y: scroll;
   overflow-x: hidden;
   color: white;
-  background: rgba(0, 0, 0, 0.5);
-  position: absolute;
-  top: 50px;
-  bottom: 50px;
-  left: 150px;
-  right: 150px;
+  background: rgba(0, 0, 0, 1);
+  margin: 50px auto;
+  width: 400px;
 }
 
 .scroll {
