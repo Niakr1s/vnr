@@ -1,31 +1,14 @@
 package translators
 
 import (
-	"context"
-	"log"
 	"strings"
 	"testing"
-	"time"
-	"vnr/src/server/chrome"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var chromeInstance *chrome.Chrome
-
-func init() {
-	c, err := chrome.NewChrome(context.Background(), chrome.ChromeOptions{
-		Headless: true,
-		Timeout:  time.Second * 15,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	chromeInstance = c
-}
-
 func TestDeeplTranslator(t *testing.T) {
-	deepl := NewDeeplTranslator(chromeInstance)
+	deepl := NewDeeplTranslator(makeChromeInstance(t))
 
 	t.Run("GetLanguages", func(t *testing.T) {
 		langs, err := deepl.GetLanguages()
