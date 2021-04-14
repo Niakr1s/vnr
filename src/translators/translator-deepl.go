@@ -2,6 +2,7 @@ package translators
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -58,7 +59,17 @@ func (dt *DeeplTranslator) GetLanguages() ([]string, error) {
 	}
 	defer r.Body.Close()
 
-	body, err := ioutil.ReadAll(r.Body)
+	res, err := getLanguagesFromDeeplBody(r.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	dt.langsCache = res
+	return res, nil
+}
+
+func getLanguagesFromDeeplBody(r io.Reader) ([]string, error) {
+	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +85,6 @@ func (dt *DeeplTranslator) GetLanguages() ([]string, error) {
 	}
 
 	res = util.RemoveDuplicates(res)
-	dt.langsCache = res
+
 	return res, nil
 }
