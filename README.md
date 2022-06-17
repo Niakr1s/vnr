@@ -4,7 +4,6 @@
 
 # Needed software
 
--   [Chromium](https://www.chromium.org/getting-involved/download-chromium). Vnr will use this in headless mode to fetch translations. _Note_: You should add chromium directory to PATH environment variable.
 -   [Textractor](https://github.com/Artikash/Textractor). Configure it to extract sentences into system clipboard.
 -   [Clipboard Inserter](https://chrome.google.com/webstore/detail/clipboard-inserter/deahejllghicakhplliloeheabddjajm) extension. Don't change default options, just don't forget to enable it every time you launch browser.
 
