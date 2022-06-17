@@ -19,10 +19,6 @@
 ```
 // vnr - name of a service, you can choose anything you want
 nssm install vnr c:\vnr.exe
-
-// c:\chrome - example path to chrome dir (not to exe!)
-nssm set vnr AppEnvironmentExtra PATH=c:\chrome
-
 nssm start vnr
 ```
 
