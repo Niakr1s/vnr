@@ -27,7 +27,10 @@ func main() {
 	defer cancelAndWait()
 	handleOsInterrupt(cancelAndWait)
 
-	var c *chrome.Chrome
+	translators := map[string]server.Translator{
+		"google": google.NewGoogleTranslator(),
+	}
+
 	if *withChrome {
 		log.Println("initializing chrome...")
 		chromeInstance, err := chrome.NewChrome(ctx, chrome.ChromeOptions{
@@ -37,15 +40,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("couldn't initialize chrome: %v", err)
 		}
-		c = chromeInstance
+		c := chromeInstance
+		translators["deepl"] = deepl.NewDeeplTranslator(c)
 	}
 
 	server.StartServer(server.ServerOptions{
-		Port: env("PORT", ":5322"),
-		Translators: map[string]server.Translator{
-			"deepl":  deepl.NewDeeplTranslator(c),
-			"google": google.NewGoogleTranslator(),
-		},
+		Port:        env("PORT", ":5322"),
+		Translators: translators,
 	})
 }
 
