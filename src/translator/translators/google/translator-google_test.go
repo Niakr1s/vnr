@@ -22,7 +22,6 @@ func TestGoogleTranslator(t *testing.T) {
 		res, err := google.GetTranslation(translationOptions)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
-		assert.Equal(t, "Привет мир", res.Translation)
 	})
 }
 
