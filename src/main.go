@@ -16,7 +16,7 @@ import (
 
 func main() {
 	var headlessFlag = flag.Bool("headless", true, "chrome headless mode")
-	var withChrome = flag.Bool("withChrome", true, "should app use chrome")
+	var withChrome = flag.Bool("withChrome", false, "should app use chrome")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
