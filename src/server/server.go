@@ -8,7 +8,10 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
+	"sync"
 	"vnr/src/translator"
+	"vnr/src/util"
 )
 
 //go:embed static
@@ -85,7 +88,7 @@ func translationHandler(translatorName string, translator Translator) http.Handl
 	return func(w http.ResponseWriter, r *http.Request) {
 		translationOptions := translationOptionsFromQuery(r.URL.Query())
 		log.Printf("%s: translate start: %+v", translatorName, translationOptions)
-		translationResult, err := translator.GetTranslation(translationOptions)
+		translationResult, err := getTranslationSplitBySentences(translator, translationOptions)
 		if err != nil {
 			log.Printf("%s: translate failure: %+v, reason: %v", translatorName, translationOptions, err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -94,6 +97,7 @@ func translationHandler(translatorName string, translator Translator) http.Handl
 		}
 		log.Printf("%s: translate success: %+v", translatorName, translationResult)
 		translationResultJson, err := json.Marshal(translationResult)
+		log.Printf("%s: translate success, json: %+v", translatorName, string(translationResultJson))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
@@ -101,6 +105,61 @@ func translationHandler(translatorName string, translator Translator) http.Handl
 		}
 		w.Write(translationResultJson)
 	}
+}
+
+func getTranslation(transl Translator, translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
+	return transl.GetTranslation(translationOptions)
+}
+
+func getTranslationSplitBySentences(transl Translator, translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
+	sentences := util.SplitToSentencesJP(translationOptions.Sentence)
+
+	translationOptionsSplitted := []translator.TranslationOptions{}
+	for _, sentence := range sentences {
+		option := translationOptions
+		option.Sentence = sentence
+		translationOptionsSplitted = append(translationOptionsSplitted, option)
+	}
+
+	translationResults := make([]translator.TranslationResult, len(translationOptionsSplitted))
+	translationErrors := make([]error, len(translationOptionsSplitted))
+
+	var wg sync.WaitGroup
+	for i, option := range translationOptionsSplitted {
+		wg.Add(1)
+		i := i
+		option := option
+		go func() {
+			defer wg.Done()
+
+			res, err := transl.GetTranslation(option)
+			translationResults[i] = res
+			translationErrors[i] = err
+		}()
+	}
+	wg.Wait()
+
+	resultErrStr := ""
+	for _, err := range translationErrors {
+		if err != nil {
+			resultErrStr += err.Error() + "; "
+		}
+	}
+	if resultErrStr != "" {
+		return translator.TranslationResult{}, fmt.Errorf(resultErrStr)
+	}
+
+	finalTranslationResultsStr := []string{}
+	for _, transRes := range translationResults {
+		finalTranslationResultsStr = append(finalTranslationResultsStr, transRes.Translation)
+	}
+
+	res := translator.TranslationResult{
+		TranslationOptions: translationOptions,
+		Translation:        strings.Join(finalTranslationResultsStr, ""),
+	}
+
+	return res, nil
 }
 
 func writeJson(obj interface{}, w http.ResponseWriter) {
