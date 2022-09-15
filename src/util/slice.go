@@ -1,6 +1,10 @@
 package util
 
-func SliceContainsString(s []string, e string) bool {
+type Comparable interface {
+	string | rune
+}
+
+func SliceContains[T Comparable](s []T, e T) bool {
 	for _, a := range s {
 		if a == e {
 			return true
