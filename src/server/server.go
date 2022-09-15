@@ -84,11 +84,19 @@ func langsHandler(translator Translator) http.HandlerFunc {
 	}
 }
 
-func translationHandler(translatorName string, translator Translator) http.HandlerFunc {
+func translationHandler(translatorName string, transl Translator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		translationOptions := translationOptionsFromQuery(r.URL.Query())
 		log.Printf("%s: translate start: %+v", translatorName, translationOptions)
-		translationResult, err := getTranslationSplitBySentences(translator, translationOptions)
+
+		var translationResult translator.TranslationResult
+		var err error
+		if translationOptions.Single {
+			translationResult, err = getTranslation(transl, translationOptions)
+		} else {
+			translationResult, err = getTranslationSplitBySentences(transl, translationOptions)
+		}
+
 		if err != nil {
 			log.Printf("%s: translate failure: %+v, reason: %v", translatorName, translationOptions, err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -175,6 +183,7 @@ func translationOptionsFromQuery(query url.Values) translator.TranslationOptions
 	sentence := query.Get("sentence")
 	from := query.Get("from")
 	to := query.Get("to")
+	single := query.Get("single")
 
 	translationOptions := translator.NewTranslationOptions(sentence)
 	if from != "" {
@@ -183,5 +192,7 @@ func translationOptionsFromQuery(query url.Values) translator.TranslationOptions
 	if to != "" {
 		translationOptions.To = to
 	}
+	translationOptions.Single = single == "true"
+
 	return translationOptions
 }

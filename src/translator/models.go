@@ -25,6 +25,9 @@ type TranslationOptions struct {
 	From     string `json:"from"`
 	To       string `json:"to"`
 	Sentence string `json:"sentence"`
+
+	// Single means, thet text won't be splitted
+	Single bool `json:"single"`
 }
 
 func NewTranslationOptions(sentence string) TranslationOptions {
