@@ -1,0 +1,26 @@
+POST https://www2.deepl.com/jsonrpc?method=LMT_handle_jobs
+
+{
+  "jsonrpc": "2.0",
+  "method": "LMT_handle_jobs",
+  "params": {
+    "jobs": [
+      {
+        "kind": "default",
+        "sentences": [
+          {
+            "text": "お母さんは私に学校に行くように言った",
+            "id": 0,
+            "prefix": ""
+          }
+        ]
+      }
+    ],
+    "lang": {
+      "source_lang_computed": "JA",
+      "target_lang": "EN"
+    },
+    "timestamp": 786783453
+  },
+  "id": 7863456
+}
