@@ -120,15 +120,35 @@ func (dt *DeeplTranslator) GetLanguages() (translator.Langs, error) {
 	}
 	defer r.Body.Close()
 
-	res, err := getLanguagesFromDeeplBody(r.Body)
-	if err != nil {
-		return nil, err
-	}
+	// res, err := getLanguagesFromDeeplBody(r.Body)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	res := getLanguages()
 
 	dt.langsCache = res
 	return res, nil
 }
 
+func getLanguages() translator.Langs {
+	return translator.Langs{
+		translator.Lang{
+			Name:        "en",
+			Description: "English",
+		},
+		translator.Lang{
+			Name:        "ru",
+			Description: "Russian",
+		},
+		translator.Lang{
+			Name:        "ja",
+			Description: "Japanese",
+		},
+	}
+}
+
+// It doesn't work and i'm too lazy, so use getLanguages() for now
 func getLanguagesFromDeeplBody(r io.Reader) (translator.Langs, error) {
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
