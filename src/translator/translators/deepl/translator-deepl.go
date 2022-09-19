@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 	"vnr/src/chrome"
 	"vnr/src/translator"
 
@@ -18,11 +19,16 @@ type DeeplTranslator struct {
 	chrome *chrome.Chrome
 
 	langsCache translator.Langs
+
+	delaySeconds int
+	delayCh      <-chan time.Time
 }
 
 func NewDeeplTranslator(chrome *chrome.Chrome) *DeeplTranslator {
 	return &DeeplTranslator{
-		chrome: chrome,
+		chrome:       chrome,
+		delaySeconds: 3,
+		delayCh:      time.After(0),
 	}
 }
 
@@ -53,6 +59,9 @@ func (dt *DeeplTranslator) getTranslationWithChrome(translationOptions translato
 }
 
 func (dt *DeeplTranslator) getTranslationWithoutChrome(translationOptions translator.TranslationOptions) (translator.TranslationResult, error) {
+	<-dt.delayCh
+	dt.delayCh = time.After(time.Second * time.Duration(dt.delaySeconds))
+
 	translationResult := translator.TranslationResult{TranslationOptions: translationOptions}
 
 	req, err := getDeeplTranslationRpcRequest(translationOptions)
