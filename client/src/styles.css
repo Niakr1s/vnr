@@ -9,7 +9,7 @@ body {
   display: flex;
 }
 
-.flex > * {
+.flex>* {
   display: inline-block;
   vertical-align: middle;
 }
@@ -24,4 +24,12 @@ body {
 
 form {
   margin: 0;
+}
+
+.sentence {
+  font-family: "MS Gothic"
+}
+
+.translation {
+  font-family: "Arial"
 }
