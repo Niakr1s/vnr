@@ -114,19 +114,35 @@ func (dt *DeeplTranslator) GetLanguages() (translator.Langs, error) {
 		return dt.langsCache, nil
 	}
 
-	r, err := http.DefaultClient.Get("https://www.deepl.com")
-	if err != nil {
-		return nil, err
-	}
-	defer r.Body.Close()
+	// dirty fix, too lazy to fix parser
+	return translator.Langs{
+		translator.Lang{
+			Name:        "ja",
+			Description: "Japanese",
+		},
+		translator.Lang{
+			Name:        "en",
+			Description: "English",
+		},
+		translator.Lang{
+			Name:        "ru",
+			Description: "Russian",
+		},
+	}, nil
 
-	res, err := getLanguagesFromDeeplBody(r.Body)
-	if err != nil {
-		return nil, err
-	}
+	// r, err := http.DefaultClient.Get("https://www.deepl.com")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer r.Body.Close()
 
-	dt.langsCache = res
-	return res, nil
+	// res, err := getLanguagesFromDeeplBody(r.Body)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// dt.langsCache = res
+	// return res, nil
 }
 
 func getLanguagesFromDeeplBody(r io.Reader) (translator.Langs, error) {

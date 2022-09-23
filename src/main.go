@@ -29,6 +29,7 @@ func main() {
 
 	translators := map[string]server.Translator{
 		"google": google.NewGoogleTranslator(),
+		"deepl":  deepl.NewDeeplTranslator(nil),
 	}
 
 	if *withChrome {
