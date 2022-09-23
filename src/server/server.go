@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"mime"
 	"net/http"
 	"net/url"
 	"vnr/src/translator"
@@ -26,6 +27,8 @@ type ServerOptions struct {
 }
 
 func StartServer(options ServerOptions) {
+	mime.AddExtensionType(".js", "application/javascript")
+
 	staticFilesRoot, err := fs.Sub(staticFiles, "static")
 	if err != nil {
 		panic(err)
