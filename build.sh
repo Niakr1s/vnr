@@ -20,7 +20,7 @@ mkdir -p dist
 if [ $angular ]
 then
     echo "building client"
-    (cd client && npm run build:prod)
+    (cd client && npm run build)
 fi
 
 echo "building executables"
