@@ -30,8 +30,12 @@ export class Sentence {
   }
 
   hasTranslation(translator: string, to: string): boolean {
-    return (
-      translator in this.translations && to in this.translations[translator]
-    );
+    let t = this.translations[translator];
+    if (!t) return false;
+
+    let l = t[to];
+    if (!l) return false;
+
+    return !l.lazy;
   }
 }

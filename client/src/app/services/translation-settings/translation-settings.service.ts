@@ -27,6 +27,7 @@ export class TranslationSettingsService {
     this.getTranslationSettings();
     this.translationSettings$.subscribe({
       next: (t) => {
+        console.log("next translation settings", t);
         this._translationSettings = t;
         t?.save();
       },
@@ -55,6 +56,16 @@ export class TranslationSettingsService {
     this.translationSettingsSubject.next(this._translationSettings);
   }
 
+  toggleTranslateAlways(translatorName: string): void {
+    const translator = this._translationSettings
+      ?.findTranslator(translatorName);
+    if (!translator) {
+      return;
+    }
+    translator.translateAlways = !translator.translateAlways;
+    this.translationSettingsSubject.next(this._translationSettings);
+  }
+
   toggleLanguage(translatorName: string, langName: string): void {
     const lang = this._translationSettings
       ?.findTranslator(translatorName)
@@ -80,7 +91,8 @@ export class TranslationSettingsService {
             .toPromise();
           const translator = Translator.create(
             name,
-            langs.map((n) => Lang.create(n.name, n.description))
+            langs.map((n) => Lang.create(n.name, n.description)),
+            true,
           );
           return translator;
         })

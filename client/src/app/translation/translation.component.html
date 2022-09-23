@@ -1,10 +1,11 @@
 <div class="bottom translation" *ngIf="sentence">
-  <div *ngFor="let translation of getTranslations()">
-    <span class="label">
+  <div *ngFor="let translation of getOrderedTranslations()">
+    <span [ngClass]="{'label': true, 'error': translation.isError()}"
+      (click)="updateTranslation(translation.translatorName,sentence,translation.to)" title="click to reload">
       {{ translation.translatorName }}-{{ translation.to }}
     </span>
     <span *ngIf="translation.pending">loading...</span>
-    <span *ngIf="translation.error"> >{{ translation.error }} </span>
+    <span *ngIf="translation.error" [title]="translation.error">error...</span>
     <span *ngIf="translation.translation">
       {{ translation.translation }}
     </span>

@@ -20,7 +20,7 @@ export class TranslationComponent implements OnInit, OnDestroy {
   constructor(
     private sentenceService: SentenceService,
     private translationSettingsService: TranslationSettingsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // this.sentence?.translations['a'].
@@ -28,6 +28,15 @@ export class TranslationComponent implements OnInit, OnDestroy {
       this.sentenceService.currentSentence$.subscribe({
         next: (sentence) => {
           this.sentence = sentence;
+        },
+      })
+    );
+    this.subs.push(
+      this.sentenceService.translationsUpdated$.subscribe({
+        next: (sentence) => {
+          if (sentence?.id !== this.sentence?.id) {
+            this.sentence = sentence;
+          }
         },
       })
     );
@@ -40,20 +49,25 @@ export class TranslationComponent implements OnInit, OnDestroy {
     );
   }
 
-  getTranslations(): Translation[] {
-    const res: Translation[] = [];
+  getOrderedTranslations(): Translation[] {
+    let res: Translation[] = []
+    if (!this.translationSettings || !this.sentence) {
+      return res;
+    }
 
-    this.translationSettings?.forEachLang((name, lang) => {
-      if (!lang.selected) {
-        return;
+    for (let translator of this.translationSettings.translators) {
+      for (let lang of translator.langs) {
+        if (lang.selected) {
+          let translation = this.sentence.translations[translator.name][lang.name];
+          res.push(translation);
+        }
       }
-      const translation = this.sentence?.getTranslation(name, lang.name);
-      if (translation) {
-        res.push(translation);
-      }
-    });
-
+    }
     return res;
+  }
+
+  updateTranslation(translatorName: string, sentence: Sentence, to: string) {
+    this.sentenceService.translate(translatorName, sentence, to);
   }
 
   ngOnDestroy(): void {

@@ -14,4 +14,9 @@
   background: darkgreen;
   color: aquamarine;
   margin-right: 3px;
+  cursor: pointer;
+}
+
+.error {
+  background: rgb(147, 60, 60);
 }

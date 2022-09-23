@@ -2,46 +2,30 @@
   <div class="inner">
     <div class="scroll">
       <div *ngIf="translationSettings">
-        <ng-container
-          *ngFor="let translator of translationSettings!.translators"
-        >
+        <ng-container *ngFor="let translator of translationSettings!.translators">
           <h2 class="center flex">
             <span> {{ translator.name }}</span>
-            <button
-              class="flex-right"
-              [disabled]="translationSettings!.isFirst(translator.name)"
-              (click)="
+            <input class="" type="checkbox" title="on = translate always, off = translate on-demand"
+              [checked]="translator.translateAlways" (click)="onTranslateAlwaysToggle(translator.name)" />
+            <button class="flex-right" [disabled]="translationSettings!.isFirst(translator.name)" (click)="
                 translationSettingsService.moveTranslatorUp(translator.name)
-              "
-            >
+              ">
               up
             </button>
-            <button
-              [disabled]="translationSettings!.isLast(translator.name)"
-              (click)="
+            <button [disabled]="translationSettings!.isLast(translator.name)" (click)="
                 translationSettingsService.moveTranslatorDown(translator.name)
-              "
-            >
+              ">
               down
             </button>
           </h2>
-          <ngx-sortable
-            [items]="translator.langs"
-            [showHeader]="false"
-            (listSorted)="onLangsSorted(translator.name, $event)"
-          >
+          <ngx-sortable [items]="translator.langs" [showHeader]="false"
+            (listSorted)="onLangsSorted(translator.name, $event)">
             <ng-template let-item>
               <div class="flex">
                 <span class="lang-name">{{ item.name }}</span>
                 <span>{{ item.description }}</span>
-                <input
-                  class="flex-right"
-                  [name]="item.name"
-                  type="checkbox"
-                  [checked]="item.selected"
-                  [title]="item.name"
-                  (click)="onToggle(translator.name, item.name)"
-                />
+                <input class="flex-right" [name]="item.name" type="checkbox" [checked]="item.selected"
+                  [title]="item.name" (click)="onLangToggle(translator.name, item.name)" />
               </div>
             </ng-template>
           </ngx-sortable>

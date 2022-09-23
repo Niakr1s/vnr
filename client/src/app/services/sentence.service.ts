@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ClipboardService } from './clipboard.service';
@@ -5,7 +6,13 @@ import { Sentence } from './models/sentence';
 import { Translation } from './models/translation';
 import { TranslationSettings } from './translation-settings/translation-settings';
 import { TranslationSettingsService } from './translation-settings/translation-settings.service';
-import { TranslationService } from './translation.service';
+
+interface TranslationResponse {
+  from: string;
+  to: string;
+  sentence: string;
+  translation: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -57,11 +64,16 @@ export class SentenceService {
     return this.currentSencenceSubject.asObservable();
   }
 
+  private translationsUpdatedSubject = new BehaviorSubject<Sentence | null>(null);
+  get translationsUpdated$(): Observable<Sentence | null> {
+    return this.translationsUpdatedSubject.asObservable();
+  }
+
   private translationSettings?: TranslationSettings;
 
   constructor(
+    private http: HttpClient,
     clipboardService: ClipboardService,
-    private translationService: TranslationService,
     private translationSettingsService: TranslationSettingsService
   ) {
     this.translationSettingsService.translationSettings$.subscribe({
@@ -81,10 +93,16 @@ export class SentenceService {
     });
     clipboardService.clipboard.subscribe({
       next: async (s) => {
-        const sentence = Sentence.create(s);
-        this.pushSentence(sentence);
+        await this.onNewSencence(s);
       },
     });
+  }
+
+  private async onNewSencence(s: string) {
+    const sentence = Sentence.create(s);
+    this.pushSentence(sentence);
+
+    this.translateMissedLanguages(sentence);
   }
 
   private pushSentence(sentence: Sentence): void {
@@ -122,28 +140,76 @@ export class SentenceService {
   }
 
   private translateMissedLanguages(sentence: Sentence): void {
-    this.translationSettings?.forEachLang((name, lang) => {
-      if (lang.selected && !sentence.hasTranslation(name, lang.name)) {
-        this.translate(name, sentence, lang.name);
+    if (!this.translationSettings) return;
+
+    for (const t of this.translationSettings.translators) {
+      for (const lang of t.langs) {
+        if (lang.selected && !sentence.hasTranslation(t.name, lang.name)) {
+          this.translate(t.name, sentence, lang.name, t.translateAlways);
+        }
       }
-    });
+    }
   }
 
-  private translate(
+  translate(
     translatorName: string,
     sentence: Sentence,
-    to: string
-  ): void {
+    to: string,
+    _doActualTranslate = true,
+  ) {
+    if (!_doActualTranslate) {
+      this.setTranslation(
+        translatorName,
+        sentence.id,
+        Translation.createLazy(translatorName, to)
+      );
+      return;
+    }
+
     this.setTranslation(
       translatorName,
       sentence.id,
       Translation.createPending(translatorName, to)
     );
-    this.translationService
-      .translate(translatorName, sentence, to)
-      .then((translation) => {
-        this.setTranslation(translatorName, sentence.id, translation);
-      });
+
+    if (_doActualTranslate) {
+      this.actualTranslate(translatorName, sentence, to)
+        .then((translation) => {
+          this.setTranslation(translatorName, sentence.id, translation);
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }
+  }
+
+  private async actualTranslate(
+    translatorName: string,
+    sentence: Sentence,
+    to: string
+  ): Promise<Translation> {
+    if (!this.translationSettings) {
+      throw new Error('no translation settings');
+    }
+    const translator = this.translationSettings.findTranslator(translatorName);
+    if (!translator) {
+      throw new Error(`no translator with name ${translatorName}`);
+    }
+    const lang = translator.findLang(to);
+    if (!lang) {
+      throw new Error(`no lang ${to}`);
+    }
+    try {
+      const res = await this.http
+        .get<TranslationResponse>(
+          `api/translate/${translator.name}?sentence=${sentence.sentence}&to=${lang.name}`
+        )
+        .toPromise();
+      return Translation.create(translatorName, to, res.translation);
+    } catch (e: any) {
+      console.error(e);
+      return Translation.createError(translatorName, to, e.message);
+    }
   }
 
   private setTranslation(
@@ -157,6 +223,7 @@ export class SentenceService {
     }
 
     sentence.setTranslation(translatorName, translation);
+    this.translationsUpdatedSubject.next(sentence);
 
     if (this.isCurrent(sentence)) {
       this.currentSencenceSubject.next(sentence);

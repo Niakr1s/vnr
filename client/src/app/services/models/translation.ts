@@ -3,6 +3,10 @@ export class Translation {
   to!: string;
 
   translation?: string;
+
+  // lazy used for on-demand translations
+  lazy = false;
+
   pending = false;
   error?: string;
 
@@ -15,6 +19,18 @@ export class Translation {
     t.translatorName = translatorName;
     t.to = to;
     t.translation = translation;
+    return t;
+  }
+
+  isError(): boolean {
+    return !!this.error;
+  }
+
+  static createLazy(translatorName: string, to: string): Translation {
+    const t = new Translation();
+    t.translatorName = translatorName;
+    t.to = to;
+    t.lazy = true;
     return t;
   }
 

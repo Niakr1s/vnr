@@ -18,7 +18,7 @@ export class SettingsComponent implements OnInit {
   constructor(
     private settingsService: SettingsService,
     public translationSettingsService: TranslationSettingsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.translationSettingsService.translationSettings$.subscribe({
@@ -38,7 +38,11 @@ export class SettingsComponent implements OnInit {
     this.settingsService.visible = false;
   }
 
-  onToggle(translatorName: string, langName: string): void {
+  onTranslateAlwaysToggle(translatorName: string) {
+    this.translationSettingsService.toggleTranslateAlways(translatorName);
+  }
+
+  onLangToggle(translatorName: string, langName: string): void {
     this.translationSettingsService.toggleLanguage(translatorName, langName);
   }
 

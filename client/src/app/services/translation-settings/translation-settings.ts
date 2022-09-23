@@ -3,12 +3,14 @@ import { Lang } from '../models/lang';
 
 export class Translator {
   name!: string;
+  translateAlways!: boolean;
   langs!: Lang[];
 
-  static create(name: string, langs: Lang[]): Translator {
+  static create(name: string, langs: Lang[], translateAlways: boolean): Translator {
     const translator = new Translator();
     translator.name = name;
     translator.langs = langs;
+    translator.translateAlways = translateAlways;
     return translator;
   }
 
@@ -22,6 +24,7 @@ export class Translator {
 
   mergeWithSavedTranslator(savedTranslator: Translator): void {
     this.langs = mergeLangs(savedTranslator.langs, this.langs);
+    this.translateAlways = savedTranslator.translateAlways;
   }
 
   moveUp(langName: string): void {
@@ -97,14 +100,6 @@ export class TranslationSettings {
     for (const savedTranslator of savedSettings.translators) {
       const translator = this.findTranslator(savedTranslator.name);
       translator?.mergeWithSavedTranslator(savedTranslator);
-    }
-  }
-
-  forEachLang(fn: (translatorName: string, lang: Lang) => void): void {
-    for (const t of this.translators) {
-      for (const l of t.langs) {
-        fn(t.name, l);
-      }
     }
   }
 
