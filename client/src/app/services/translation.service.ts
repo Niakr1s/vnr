@@ -50,7 +50,7 @@ export class TranslationService {
         )
         .toPromise();
       return Translation.create(translatorName, to, res.translation);
-    } catch (e) {
+    } catch (e: any) {
       return Translation.createError(translatorName, to, e.message);
     }
   }
