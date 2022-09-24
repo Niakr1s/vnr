@@ -25,4 +25,4 @@ fi
 
 echo "building executables"
 go build -o=dist/vnr src/main.go
-GOOS=windows GOARCH=amd64 go build -o dist/vnr.exe src/main.go
+GOOS=windows GOARCH=amd64 go build -ldflags "-H=windowsgui" -o dist/vnr.exe src/main.go
