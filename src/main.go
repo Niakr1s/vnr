@@ -12,6 +12,7 @@ import (
 	"vnr/src/server"
 	"vnr/src/translator/translators/deepl"
 	"vnr/src/translator/translators/google"
+	"vnr/src/tray"
 )
 
 func main() {
@@ -44,6 +45,8 @@ func main() {
 		c := chromeInstance
 		translators["deepl"] = deepl.NewDeeplTranslator(c)
 	}
+
+	tray.Run()
 
 	server.StartServer(server.ServerOptions{
 		Port:        env("PORT", ":5322"),
