@@ -14,6 +14,8 @@ func Run(tooltip string) {
 		systray.Run(func() {
 			systray.SetTitle("VNR")
 			systray.SetTooltip(fullTooltip)
+			systray.SetIcon(trayIcon)
+
 			quit := systray.AddMenuItem("Quit", "Quit the app")
 
 			go func() {

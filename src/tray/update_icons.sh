@@ -1,0 +1,1 @@
+2goarray.exe trayIcon tray < tray.ico > trayIcon.go
