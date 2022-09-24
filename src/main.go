@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -46,10 +47,12 @@ func main() {
 		translators["deepl"] = deepl.NewDeeplTranslator(c)
 	}
 
-	tray.Run()
+	port := ":5322"
+
+	tray.Run(fmt.Sprintf("Server is listening on port %s", port))
 
 	server.StartServer(server.ServerOptions{
-		Port:        env("PORT", ":5322"),
+		Port:        env("PORT", port),
 		Translators: translators,
 	})
 }

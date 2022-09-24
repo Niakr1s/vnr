@@ -1,30 +1,27 @@
 package tray
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/getlantern/systray"
 )
 
-func Run() {
+func Run(tooltip string) {
+	fullTooltip := fmt.Sprintf("Visual Novel Reader - %s", tooltip)
+
 	go func() {
-		systray.Run(onReady(), onExit)
+		systray.Run(func() {
+			systray.SetTitle("VNR")
+			systray.SetTooltip(fullTooltip)
+			quit := systray.AddMenuItem("Quit", "Quit the app")
+
+			go func() {
+				<-quit.ClickedCh
+				systray.Quit()
+			}()
+		}, func() {
+			os.Exit(0)
+		})
 	}()
-}
-
-func onReady() func() {
-	return func() {
-		systray.SetTitle("VNR")
-		systray.SetTooltip("Visual Novel Reader")
-		quit := systray.AddMenuItem("Quit", "Quit the app")
-
-		go func() {
-			<-quit.ClickedCh
-			systray.Quit()
-		}()
-	}
-}
-
-func onExit() {
-	os.Exit(0)
 }
