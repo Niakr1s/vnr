@@ -223,10 +223,6 @@ export class SentenceService {
 
     sentence.setTranslation(translatorName, translation);
     this.translationsUpdatedSubject.next(sentence);
-
-    if (this.isCurrent(sentence)) {
-      this.currentSencenceSubject.next(sentence);
-    }
   }
 
   private isCurrent(sentence: Sentence): boolean {
