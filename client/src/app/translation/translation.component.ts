@@ -67,7 +67,7 @@ export class TranslationComponent implements OnInit, OnDestroy {
   }
 
   updateTranslation(translatorName: string, sentence: Sentence, to: string) {
-    this.sentenceService.translate(translatorName, sentence, to);
+    this.sentenceService.translate(translatorName, sentence, to, true);
   }
 
   ngOnDestroy(): void {
