@@ -172,15 +172,14 @@ export class SentenceService {
       Translation.createPending(translatorName, to)
     );
 
-    if (_doActualTranslate) {
-      this.actualTranslate(translatorName, sentence, to)
-        .then((translation) => {
-          this.setTranslation(translatorName, sentence.id, translation);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    }
+    this.actualTranslate(translatorName, sentence, to)
+      .then((translation) => {
+        console.log("got translation: ", translation);
+        this.setTranslation(translatorName, sentence.id, translation);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   }
 
   private async actualTranslate(
