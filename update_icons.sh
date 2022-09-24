@@ -1,0 +1,1 @@
+2goarray.exe icon tray < icon.ico > src/tray/icon.go
