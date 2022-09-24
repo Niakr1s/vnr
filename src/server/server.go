@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -9,7 +10,11 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"time"
 	"vnr/src/translator"
+
+	"github.com/tjgq/broadcast"
+	"golang.design/x/clipboard"
 )
 
 //go:embed static
@@ -24,6 +29,10 @@ type ServerOptions struct {
 	Port string
 
 	Translators map[string]Translator
+}
+
+type ClipboardPollHandlerOptions struct {
+	Delay time.Duration
 }
 
 func StartServer(options ServerOptions) {
@@ -45,6 +54,16 @@ func StartServer(options ServerOptions) {
 		http.HandleFunc(fmt.Sprintf("/api/translate/%s", name), translationHandler(name, translator))
 		http.HandleFunc(fmt.Sprintf("/api/langs/%s", name), langsHandler(translator))
 	}
+
+	err = clipboard.Init()
+	if err != nil {
+		panic(err)
+	}
+
+	http.HandleFunc("/api/clipboard", clipboardHandler())
+	http.HandleFunc("/api/clipboardPoll", clipboardPollHandler(ClipboardPollHandlerOptions{
+		Delay: time.Second * 10,
+	}))
 
 	log.Printf("Listening on %s...", options.Port)
 	// start the server
@@ -128,4 +147,49 @@ func translationOptionsFromQuery(query url.Values) translator.TranslationOptions
 		translationOptions.To = to
 	}
 	return translationOptions
+}
+
+func clipboardHandler() http.HandlerFunc {
+	type Response struct {
+		Clipboard string `json:"clipboard"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		contents := clipboard.Read(clipboard.FmtText)
+		res := Response{
+			Clipboard: string(contents),
+		}
+		writeJson(res, w)
+	}
+}
+
+// Returns empty string, if clipboard wasn't changed
+func clipboardPollHandler(options ClipboardPollHandlerOptions) http.HandlerFunc {
+	type Response struct {
+		Clipboard string `json:"clipboard"`
+	}
+	res := Response{}
+
+	clipboardBroadcaster := broadcast.New(0)
+	go func() {
+		clipboardCh := clipboard.Watch(context.TODO(), clipboard.FmtText)
+		for {
+			contents := <-clipboardCh
+			clipboardBroadcaster.Send(contents)
+		}
+	}()
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		l := clipboardBroadcaster.Listen()
+		defer l.Close()
+
+		select {
+		case contents := <-l.Ch:
+			res.Clipboard = string(contents.([]byte))
+
+		case <-time.After(options.Delay):
+		}
+
+		writeJson(res, w)
+	}
 }

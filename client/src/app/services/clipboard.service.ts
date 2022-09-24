@@ -1,6 +1,11 @@
 import { DOCUMENT } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+
+interface ClipboardResponse {
+  clipboard: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -12,32 +17,36 @@ export class ClipboardService {
     return this.clipboardSubject.asObservable();
   }
 
-  private observer: MutationObserver;
-  constructor(@Inject(DOCUMENT) document: Document) {
-    this.observer = this.makeMutationObserver();
+  private previousClipboardContents: string = "";
 
-    const body = document.querySelector('body');
-    if (!body) {
-      throw new Error('body is null');
-    }
-    this.observer.observe(body, { childList: true });
+  constructor(private http: HttpClient) {
+    http.get<ClipboardResponse>("api/clipboard").toPromise()
+      .then((r) => {
+        this.setNewClipboardContents(r.clipboard);
+        this.startClipboardPoll();
+      })
+      .catch((e) => {
+        console.error(e);
+      })
   }
 
-  private makeMutationObserver(): MutationObserver {
-    return new MutationObserver(() => {
-      const ps = document.getElementsByTagName('p');
+  private startClipboardPoll() {
+    this.http.get<ClipboardResponse>("api/clipboardPoll").toPromise()
+      .then((r) => {
+        this.setNewClipboardContents(r.clipboard);
+      })
+      .catch((e) => {
+        console.error(e);
+      })
+      .finally(() => {
+        this.startClipboardPoll();
+      })
+  }
 
-      // removing all except last
-      while (ps.length > 0) {
-        const sentence = ps[0].textContent;
-        ps[0].remove();
+  private setNewClipboardContents(contents: string) {
+    if (!contents || contents === this.previousClipboardContents) return;
 
-        if (!sentence) {
-          continue;
-        }
-
-        this.clipboardSubject.next(sentence);
-      }
-    });
+    this.previousClipboardContents = contents;
+    this.clipboardSubject.next(contents);
   }
 }
